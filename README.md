@@ -3,7 +3,7 @@
 
 Dojang is a service that issues offchain information (outside the blockchain) as onchain attestations on the Giwa chain. It plays an important role in linking onchain wallet addresses with offchain information. This allows users to hold an onchain identity without revealing Personally Identifiable Information (PII) from their wallet.
 
-Dojang is designed to establish the trust layer of the Giwa ecosystem by leveraging Ethereum Attestation Service (EAS).
+Dojang aims to establish the trust layer of the Giwa ecosystem by leveraging Ethereum Attestation Service (EAS).
 
 ## Contracts
 
