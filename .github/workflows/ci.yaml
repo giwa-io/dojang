@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  variables:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: get node version
+        id: node-version
+        run: echo node-version=$(cat contracts/.node-version) >> $GITHUB_OUTPUT
+    outputs:
+      node-version: ${{ steps.node-version.outputs.node-version }}
+
+  lint:
+    needs: [variables]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions
+      - name: Lint
+        run: |
+          pnpm install
+          pnpm dep
+          pnpm build
+          pnpm lint
+        working-directory: .
+
+  test:
+    needs: [variables]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions
+      - name: Test and Coverage
+        run: |
+          pnpm install
+          pnpm dep
+          pnpm build
+          pnpm test:coverage
+        working-directory: .

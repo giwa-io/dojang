@@ -1,0 +1,29 @@
+name: Setup Foundry and Node.js
+description: Common setup for Foundry and Node
+
+inputs:
+  node-version:
+    description: Node.js version to set up
+    required: true
+    default: '20.x'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Foundry
+      run: |
+        curl -L https://foundry.paradigm.xyz | bash
+        source $HOME/.bashrc
+        $HOME/.foundry/bin/foundryup
+        echo "$HOME/.foundry/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install pnpm
+      run: |
+        npm install -g pnpm
+      shell: bash
