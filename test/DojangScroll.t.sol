@@ -13,11 +13,9 @@ import {
 } from "../src/libraries/Common.sol";
 import {AttestationVerifier} from "../src/libraries/AttestationVerifier.sol";
 import {DojangScroll} from "../src/DojangScroll.sol";
-import {IAttestationIndexer} from "../src/interfaces/IAttestationIndexer.sol";
 import {IDojangScroll} from "../src/interfaces/IDojangScroll.sol";
 import {ERC1967Proxy} from "@openzeppelin-contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IAccessControl} from "@openzeppelin-contracts/access/IAccessControl.sol";
-import {Strings} from "@openzeppelin-contracts/utils/Strings.sol";
 import {Initializable} from "@openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IEAS, Attestation} from "@eas-contracts/contracts/IEAS.sol";
 import {Predeploys, DojangSchemaIds, DojangAttesterIds} from "../src/libraries/Types.sol";

@@ -2,11 +2,10 @@
 pragma solidity ^0.8.28;
 
 import {Script} from "forge-std/Script.sol";
-import {console2 as console} from "forge-std/console2.sol";
 import {Upgrades} from "openzeppelin-foundry-upgrades/src/Upgrades.sol";
 import {ISchemaRegistry} from "@eas-contracts/contracts/ISchemaRegistry.sol";
 import {IEAS} from "@eas-contracts/contracts/IEAS.sol";
-import {Predeploys, DojangSchemaIds, DojangAttesterIds} from "src/libraries/Types.sol";
+import {Predeploys, DojangSchemaIds} from "src/libraries/Types.sol";
 import {Artifacts} from "../utils/Artifacts.s.sol";
 import {SchemaBook} from "src/SchemaBook.sol";
 import {DojangAttesterBook} from "src/DojangAttesterBook.sol";

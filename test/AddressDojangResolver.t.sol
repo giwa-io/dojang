@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {IndexerUpdated, ZeroAddress, InvalidIndexer} from "../src/libraries/Common.sol";
+import {IndexerUpdated, ZeroAddress} from "../src/libraries/Common.sol";
 import {AddressDojangResolver} from "../src/AddressDojangResolver.sol";
 import {ERC1967Proxy} from "@openzeppelin-contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {IAccessControl} from "@openzeppelin-contracts/access/IAccessControl.sol";
@@ -14,11 +14,9 @@ import {
     RevocationRequest,
     RevocationRequestData
 } from "@eas-contracts/contracts/IEAS.sol";
-import {Strings} from "@openzeppelin-contracts/utils/Strings.sol";
 import {SchemaRegistry} from "@eas-contracts/contracts/SchemaRegistry.sol";
 import {EAS} from "@eas-contracts/contracts/EAS.sol";
 import {Predeploys} from "../src/libraries/Types.sol";
-import {AccessControlUpgradeable} from "@openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 contract AddressDojangResolver_Base is Test {
     AddressDojangResolver public addressDojangResolver;

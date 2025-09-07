@@ -59,7 +59,7 @@ contract BalanceIndexingResolver_Test is BalanceValidationResolver_Base {
     function test_onAttest_false_for_invalid_coinType() public {
         Attestation memory attestation;
         attestation.uid = bytes32("uid");
-        attestation.data = abi.encode(1 << 31 + 1, 1_700_000_000 - 1, BALANCE);
+        attestation.data = abi.encode(1 + 1 << 31, 1_700_000_000 - 1, BALANCE);
 
         assertFalse(mockBalanceValidationResolver.mockAttest(attestation));
     }

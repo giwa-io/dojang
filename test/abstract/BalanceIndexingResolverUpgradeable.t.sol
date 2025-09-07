@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {IndexerUpdated, ZeroAddress, InvalidIndexer} from "../../src/libraries/Common.sol";
+import {IndexerUpdated, InvalidIndexer} from "../../src/libraries/Common.sol";
 import {Attestation} from "@eas-contracts/contracts/IEAS.sol";
 import {BalanceIndexingResolverUpgradeable} from "../../src/abstract/BalanceIndexingResolverUpgradeable.sol";
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {Attestation} from "@eas-contracts/contracts/IEAS.sol";
 import {AttestationVerifier} from "../../src/libraries/AttestationVerifier.sol";
 

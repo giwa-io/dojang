@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {BalanceDojangResolver} from "../src/BalanceDojangResolver.sol";
 import {ERC1967Proxy} from "@openzeppelin-contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Initializable} from "@openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
-import {IndexerUpdated, ZeroAddress, InvalidIndexer} from "../src/libraries/Common.sol";
+import {IndexerUpdated, ZeroAddress} from "../src/libraries/Common.sol";
 import {IAccessControl} from "@openzeppelin-contracts/access/IAccessControl.sol";
 import {SchemaRegistry} from "@eas-contracts/contracts/SchemaRegistry.sol";
 import {EAS} from "@eas-contracts/contracts/EAS.sol";
