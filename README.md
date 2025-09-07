@@ -18,15 +18,15 @@ Dojang is designed to establish the trust layer of the Giwa ecosystem by leverag
 
 - Contracts
 
-| Name                  | Description                                                           | Address                                                                                                                             |
-|-----------------------|-----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| SchemaRegistry        | Handles schema registration and lookup                                | [`0x4200000000000000000000000000000000000020`](https://sepolia-explorer.giwa.io/address/0x4200000000000000000000000000000000000020) |
-| EAS                   | Issues, revokes, and fetches attestations                             | [`0x4200000000000000000000000000000000000021`](https://sepolia-explorer.giwa.io/address/0x4200000000000000000000000000000000000021) |
-| SchemaBook            | Manages the list of registered schemas                                | [`0x78cBb3413FBb6aF05EF1D21e646440e56baE3AD6`](https://sepolia-explorer.giwa.io/address/0x78cBb3413FBb6aF05EF1D21e646440e56baE3AD6) |
-| DojangAttesterBook    | Manages the list of attesters used in Dojang                          | [`0xDA282E89244424E297Ce8e78089B54D043FB28B6`](https://sepolia-explorer.giwa.io/address/0xDA282E89244424E297Ce8e78089B54D043FB28B6) |
-| AttestationIndexer    | Indexes all Dojang attestations for query                             | [`0x9C9Bf29880448aB39795a11b669e22A0f1d790ec`](https://sepolia-explorer.giwa.io/address/0x9C9Bf29880448aB39795a11b669e22A0f1d790ec) |
-| AddressDojangResolver | Triggered on issuance or revocation of a Verified Address attestation | [`0x692009FE206C3F897867F6BF7B5B45506B747F9e`](https://sepolia-explorer.giwa.io/address/0x692009FE206C3F897867F6BF7B5B45506B747F9e) |
-| DojangScroll          | Provides convenient read access to Dojang data                        | [`0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9`](https://sepolia-explorer.giwa.io/address/0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9) |
+| Name                  | Description                                                           | Address                                                                                                                             | Version |
+|-----------------------|-----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|---------|
+| SchemaRegistry        | Handles schema registration and lookup                                | [`0x4200000000000000000000000000000000000020`](https://sepolia-explorer.giwa.io/address/0x4200000000000000000000000000000000000020) | v0.1.0  |
+| EAS                   | Issues, revokes, and fetches attestations                             | [`0x4200000000000000000000000000000000000021`](https://sepolia-explorer.giwa.io/address/0x4200000000000000000000000000000000000021) | v0.1.0  |
+| SchemaBook            | Manages the list of registered schemas                                | [`0x78cBb3413FBb6aF05EF1D21e646440e56baE3AD6`](https://sepolia-explorer.giwa.io/address/0x78cBb3413FBb6aF05EF1D21e646440e56baE3AD6) | v0.1.0  |
+| DojangAttesterBook    | Manages the list of attesters used in Dojang                          | [`0xDA282E89244424E297Ce8e78089B54D043FB28B6`](https://sepolia-explorer.giwa.io/address/0xDA282E89244424E297Ce8e78089B54D043FB28B6) | v0.1.0  |
+| AttestationIndexer    | Indexes all Dojang attestations for query                             | [`0x9C9Bf29880448aB39795a11b669e22A0f1d790ec`](https://sepolia-explorer.giwa.io/address/0x9C9Bf29880448aB39795a11b669e22A0f1d790ec) | v0.1.0  |
+| AddressDojangResolver | Triggered on issuance or revocation of a Verified Address attestation | [`0x692009FE206C3F897867F6BF7B5B45506B747F9e`](https://sepolia-explorer.giwa.io/address/0x692009FE206C3F897867F6BF7B5B45506B747F9e) | v0.1.0  |
+| DojangScroll          | Provides convenient read access to Dojang data                        | [`0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9`](https://sepolia-explorer.giwa.io/address/0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9) | v0.1.0  |
 
 
 ## Usage
