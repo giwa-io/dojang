@@ -1,0 +1,26 @@
+{
+  "name": "dojang",
+  "version": "0.1.0",
+  "description": "Contracts for Dojang Service",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "clean": "forge clean",
+    "dep": "forge soldeer install",
+    "build": "pnpm run clean && forge build",
+    "test": "forge test -vvv --ffi",
+    "test:coverage": "forge coverage --no-match-coverage 'script|SchemaResolverUpgradeable'",
+    "test:coverage-report": "forge coverage --no-match-coverage 'script|SchemaResolverUpgradeable' --report lcov && genhtml --ignore-errors inconsistent -o coverage-report --branch-coverage lcov.info && open ./coverage-report/index.html",
+    "lint": "forge fmt --check && pnpm solhint \"src/**/*.sol\" --max-warnings=0",
+    "lint:fix": "forge fmt && pnpm solhint \"src/**/*.sol\" --fix",
+    "slither": "slither ."
+  },
+  "devDependencies": {
+    "solhint": "^5.0.5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.15.1"
+}

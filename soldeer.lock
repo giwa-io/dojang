@@ -1,0 +1,33 @@
+[[dependencies]]
+name = "@eas-contracts"
+version = "1.4.0"
+git = "https://github.com/ethereum-attestation-service/eas-contracts.git"
+rev = "d223e17208aa110dd5ec694d77324a2321d93201"
+
+[[dependencies]]
+name = "@openzeppelin-contracts"
+version = "5.1.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/@openzeppelin-contracts/5_1_0_19-10-2024_10:28:52_contracts.zip"
+checksum = "fd3d1ea561cb27897008aee18ada6e85f248eb161c86e4435272fc2b5777574f"
+integrity = "cb6cf6e878f2943b2291d5636a9d72ac51d43d8135896ceb6cf88d36c386f212"
+
+[[dependencies]]
+name = "@openzeppelin-contracts-upgradeable"
+version = "5.1.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/@openzeppelin-contracts-upgradeable/5_1_0_19-10-2024_10:28:58_contracts-upgradeable.zip"
+checksum = "87854223d14941d6fda3d78d900217e79e25755ea5bc48beca035766fa6a4e7e"
+integrity = "826fb621339dcee4261f848b283ec86364743d3c289d61f621747d95e315215a"
+
+[[dependencies]]
+name = "forge-std"
+version = "1.9.6"
+url = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_9_6_01-02-2025_20:49:10_forge-std-1.9.zip"
+checksum = "55f341818321b3f925161a72fd0dcd62e4a0a4b66785a7a932bf2bfaf96fb9d1"
+integrity = "e9ecdc364d152157431e5df5aa041ffddbe9bb1c1ad81634b1e72df9e23814e8"
+
+[[dependencies]]
+name = "openzeppelin-foundry-upgrades"
+version = "0.4.0"
+url = "https://soldeer-revisions.s3.amazonaws.com/openzeppelin-foundry-upgrades/0_4_0_27-01-2025_18:32:41_openzeppelin-foundry-upgrades.zip"
+checksum = "d38121a53a68c9a3e10032d37c712b28604a673c77b7186332f65c423e53cc45"
+integrity = "b7e188f4413cc54dfd0badee01d4239f1510f02f561af324a68815583c245edb"

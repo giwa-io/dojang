@@ -1,0 +1,13 @@
+.idea
+.DS_Store
+.envrc.local
+.issue_title
+.vscode
+
+cache/
+out/
+dependencies/
+node_modules/
+coverage-report/
+
+.env

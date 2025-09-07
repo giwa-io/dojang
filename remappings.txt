@@ -1,0 +1,6 @@
+@eas-contracts/=dependencies/@eas-contracts-1.4.0/
+@openzeppelin-contracts-upgradeable/=dependencies/@openzeppelin-contracts-upgradeable-5.1.0/
+@openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.1.0/
+@openzeppelin/contracts/=dependencies/@openzeppelin-contracts-5.1.0/
+forge-std/=dependencies/forge-std-1.9.6/src/
+openzeppelin-foundry-upgrades/=dependencies/openzeppelin-foundry-upgrades-0.4.0/

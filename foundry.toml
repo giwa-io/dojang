@@ -1,0 +1,43 @@
+[profile.default]
+src = "src"
+out = "out"
+script = "script"
+optimizer = true
+optimizer_runs = 999999
+libs = ["dependencies"]
+via_ir = true
+ast = true
+build_info = true
+extra_output = ["storageLayout", "metadata"]
+
+ffi = true
+fs_permissions = [
+    { access='read-write', path='./deployments/' },
+    { access='read', path = './out/' }
+]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[dependencies]
+"@openzeppelin-contracts" = { version = "5.1.0" }
+"@openzeppelin-contracts-upgradeable" = { version = "5.1.0" }
+"@eas-contracts" = { version = "1.4.0", git = "https://github.com/ethereum-attestation-service/eas-contracts.git", tag = "v1.4.0" }
+forge-std = "1.9.6"
+openzeppelin-foundry-upgrades = "0.4.0"
+
+[soldeer]
+remappings_generate = true
+remappings_regenerate = false
+remappings_version = false
+remappings_location = "txt"
+recursive_deps = true
+
+[fmt]
+bracket_spacing = false
+int_types = "long"
+line_length = 120
+multiline_func_header = "all"
+number_underscore = "thousands"
+quote_style = "double"
+tab_width = 4
+wrap_comments = true
