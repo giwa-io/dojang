@@ -9,7 +9,7 @@ import {IndexerUpdated, InvalidIndexer} from "../libraries/Common.sol";
 
 /**
  * @title Balance Dojang Indexing Resolver for EAS
- * @dev A base contract for creating an EAS Schema Resolver than indexes attestations
+ * @dev A base contract for creating an EAS Schema Resolver that indexes attestations
  * for balance dojang.
  */
 abstract contract BalanceIndexingResolverUpgradeable is Initializable, SchemaResolverUpgradeable {

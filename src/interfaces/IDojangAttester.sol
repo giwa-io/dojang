@@ -9,7 +9,7 @@ interface IDojangAttester {
     event AddressRevoked(address indexed addr);
 
     /// @notice Emitted when a balance is attested
-    event BalanceAttested(address indexed recipient, uint256 indexed coinType, uint64 indexed snashotAt);
+    event BalanceAttested(address indexed recipient, uint256 indexed coinType, uint64 indexed snapshotAt);
 
     /// @notice Emitted when a balance is revoked
     event BalanceRevoked(address indexed recipient, uint256 indexed coinType, uint64 indexed snapshotAt);
