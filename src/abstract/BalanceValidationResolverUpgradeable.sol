@@ -8,7 +8,7 @@ import {BIP44CoinTypes} from "../libraries/Types.sol";
 
 /**
  * @title Balance Dojang Validation Resolver for EAS
- * @dev A base contract for creating an EAS Schema Resolver than validate attestations
+ * @dev A base contract for creating an EAS Schema Resolver that validate attestations
  * for balance dojang.
  */
 abstract contract BalanceValidationResolverUpgradeable is Initializable, SchemaResolverUpgradeable {

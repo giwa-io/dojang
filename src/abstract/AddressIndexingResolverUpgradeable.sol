@@ -9,7 +9,7 @@ import {IndexerUpdated, InvalidIndexer} from "../libraries/Common.sol";
 
 /**
  * @title Address Dojang Indexing Resolver for EAS
- * @dev A base contract for creating an EAS Schema Resolver than indexes attestations
+ * @dev A base contract for creating an EAS Schema Resolver that indexes attestations
  * for address dojang.
  */
 abstract contract AddressIndexingResolverUpgradeable is Initializable, SchemaResolverUpgradeable {

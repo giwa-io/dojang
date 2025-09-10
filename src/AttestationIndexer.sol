@@ -60,7 +60,7 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
     }
 
     /**
-     * @notice Pause the contract, halting index the attestation.
+     * @notice Pause the contract, halting attestation indexing.
      * @dev Only callable by accounts with PAUSER_ROLE
      */
     function pause() external onlyRole(PAUSER_ROLE) {
@@ -68,7 +68,7 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
     }
 
     /**
-     * @notice Resumes the contract, allowing index the attestation.
+     * @notice Resumes the contract, resuming attestation indexing.
      * @dev Only callable by accounts with PAUSER_ROLE
      */
     function unpause() external onlyRole(PAUSER_ROLE) {
