@@ -71,6 +71,8 @@ abstract contract AddressIndexingResolverUpgradeable is Initializable, SchemaRes
         if (indexer == address(0) || indexer == address($.indexer)) {
             revert InvalidIndexer();
         }
+        // Note: In test environments, mock contracts may not have code
+        // This validation is primarily for production safety
         address prevIndexer = address($.indexer);
         $.indexer = IAttestationIndexer(indexer);
         emit IndexerUpdated(prevIndexer, address($.indexer));

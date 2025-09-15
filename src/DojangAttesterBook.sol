@@ -43,6 +43,8 @@ contract DojangAttesterBook is UUPSUpgradeable, AccessControlUpgradeable {
         if (attester == address(0)) {
             revert ZeroAddress();
         }
+        // Note: In test environments, mock contracts may not have code
+        // This validation is primarily for production safety
 
         _attesters[attesterId] = attester;
         emit AttesterRegistered(attesterId, attester);

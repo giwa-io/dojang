@@ -34,7 +34,7 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
     mapping(
         bytes32 schemaUid
             => mapping(address attester => mapping(address recipient => mapping(bytes32 key => bytes32 attestationUid)))
-    ) private _rawDB;
+    ) private rawDB;
 
     /**
      * @dev Locks the contract, preventing any future reinitialization. This
@@ -87,7 +87,7 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
         view
         returns (bytes32)
     {
-        return _rawDB[schemaUid][attester][recipient][DEFAULT_KEY];
+        return rawDB[schemaUid][attester][recipient][DEFAULT_KEY];
     }
 
     /**
@@ -103,7 +103,7 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
         view
         returns (bytes32)
     {
-        return _rawDB[schemaUid][attester][recipient][key];
+        return rawDB[schemaUid][attester][recipient][key];
     }
 
     /**
@@ -139,7 +139,7 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
         Attestation memory attestation = _EAS.getAttestation(attestationUid);
         attestation.verify();
 
-        _rawDB[attestation.schema][attestation.attester][attestation.recipient][key] = attestationUid;
+        rawDB[attestation.schema][attestation.attester][attestation.recipient][key] = attestationUid;
         emit AttestationIndexed(attestation.schema, attestation.attester, attestation.recipient, key, attestation.uid);
     }
 }

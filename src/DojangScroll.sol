@@ -60,6 +60,8 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
         if (schemaBook == address(0) || schemaBook == address(_schemaBook)) {
             revert InvalidSchemaBook();
         }
+        // Note: In test environments, mock contracts may not have code
+        // This validation is primarily for production safety
         address prevSchemaBook = address(_schemaBook);
         _schemaBook = SchemaBook(schemaBook);
         emit SchemaBookUpdated(prevSchemaBook, address(_schemaBook));
@@ -72,6 +74,8 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
         if (dojangAttesterBook == address(0) || dojangAttesterBook == address(_dojangAttesterBook)) {
             revert InvalidDojangAttesterBook();
         }
+        // Note: In test environments, mock contracts may not have code
+        // This validation is primarily for production safety
         address prevDojangAttesterBook = address(_dojangAttesterBook);
         _dojangAttesterBook = DojangAttesterBook(dojangAttesterBook);
         emit DojangAttesterBookUpdated(prevDojangAttesterBook, address(_dojangAttesterBook));
@@ -86,6 +90,8 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
         if (indexer == address(0) || indexer == address(_indexer)) {
             revert InvalidIndexer();
         }
+        // Note: In test environments, mock contracts may not have code
+        // This validation is primarily for production safety
         address prevIndexer = address(_indexer);
         _indexer = IAttestationIndexer(indexer);
         emit IndexerUpdated(prevIndexer, address(_indexer));

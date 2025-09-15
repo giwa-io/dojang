@@ -12,14 +12,14 @@ struct Deployment {
 
 abstract contract Artifacts {
     /// @notice Foundry cheatcode VM.
-    Vm private constant _vm = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
+    Vm private constant VM = Vm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     string internal _deploymentOutFile;
     mapping(string => Deployment) internal _namedDeployments;
 
     function setUp() public virtual {
         _deploymentOutFile =
-            string.concat(_vm.projectRoot(), "/deployments/", _vm.toString(block.chainid), "-deploy.json");
+            string.concat(VM.projectRoot(), "/deployments/", VM.toString(block.chainid), "-deploy.json");
         _ensurePath(_deploymentOutFile);
         console.log("Writing artifact to %s", _deploymentOutFile);
 
@@ -50,15 +50,15 @@ abstract contract Artifacts {
     }
 
     function _ensurePath(string memory path) private {
-        string[] memory outputs = _vm.split(path, "/");
+        string[] memory outputs = VM.split(path, "/");
         string memory dir = "";
         for (uint256 i = 0; i < outputs.length - 1; i++) {
             dir = string.concat(dir, outputs[i], "/");
         }
-        _vm.createDir(dir, true);
+        VM.createDir(dir, true);
     }
 
     function _appendDeployment(Deployment memory deployment) internal {
-        _vm.writeJson({json: stdJson.serialize("", deployment.name, deployment.addr), path: _deploymentOutFile});
+        VM.writeJson({json: stdJson.serialize("", deployment.name, deployment.addr), path: _deploymentOutFile});
     }
 }
