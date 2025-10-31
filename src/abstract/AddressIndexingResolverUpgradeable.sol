@@ -29,9 +29,8 @@ abstract contract AddressIndexingResolverUpgradeable is Initializable, SchemaRes
         __AddressIndexingResolver_init_unchained();
     }
 
-    function __AddressIndexingResolver_init_unchained() internal onlyInitializing 
     // solhint-disable-next-line no-empty-blocks
-    {}
+    function __AddressIndexingResolver_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev Indexes the given attestation via the external indexer.

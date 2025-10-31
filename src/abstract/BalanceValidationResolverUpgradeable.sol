@@ -18,9 +18,8 @@ abstract contract BalanceValidationResolverUpgradeable is Initializable, SchemaR
         __BalanceValidationResolver_init_unchained();
     }
 
-    function __BalanceValidationResolver_init_unchained() internal onlyInitializing 
     // solhint-disable-next-line no-empty-blocks
-    {}
+    function __BalanceValidationResolver_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev Extracts attestation data and validate it.
