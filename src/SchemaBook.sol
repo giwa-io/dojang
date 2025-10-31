@@ -29,6 +29,9 @@ contract SchemaBook is UUPSUpgradeable, AccessControlUpgradeable {
     /// @notice Thrown when trying to set invalid eas schema uid
     error InvalidEasSchemaUid();
 
+    /// @notice Thrown when trying to register a schema that is already registered
+    error SchemaAlreadyRegistered();
+
     /**
      * @dev Locks the contract, preventing any future reinitialization. This
      * implementation contract was designed to be called through proxies.
@@ -50,6 +53,9 @@ contract SchemaBook is UUPSUpgradeable, AccessControlUpgradeable {
         external
         onlyRole(AccessControlUpgradeable.DEFAULT_ADMIN_ROLE)
     {
+        if (_schemas[schemaId] != bytes32(0)) {
+            revert SchemaAlreadyRegistered();
+        }
         if (schemaId == bytes32(0)) {
             revert InvalidSchemaId();
         }
