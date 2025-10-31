@@ -28,9 +28,8 @@ abstract contract BalanceIndexingResolverUpgradeable is Initializable, SchemaRes
         __BalanceIndexingResolver_init_unchained();
     }
 
-    function __BalanceIndexingResolver_init_unchained() internal onlyInitializing 
     // solhint-disable-next-line no-empty-blocks
-    {}
+    function __BalanceIndexingResolver_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev Extracts attestation data and indexes it with UID via the

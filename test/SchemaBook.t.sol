@@ -155,4 +155,19 @@ contract SchemaBook_Test is SchemaBook_Base {
 
         assertEq(schemaBook.getSchemaUid(DojangSchemaIds.ADDRESS_DOJANG), bytes32(0));
     }
+
+    function test_register_revert_when_duplicateSchemaId() public {
+        vm.mockCall(
+            Predeploys.SCHEMA_REGISTRY,
+            abi.encodeWithSelector(ISchemaRegistry.getSchema.selector, ADDRESS_SCHEMA_UID),
+            abi.encode(addressSchema)
+        );
+
+        vm.prank(admin);
+        schemaBook.register(DojangSchemaIds.ADDRESS_DOJANG, ADDRESS_SCHEMA_UID);
+
+        vm.expectRevert(SchemaBook.SchemaAlreadyRegistered.selector);
+        vm.prank(admin);
+        schemaBook.register(DojangSchemaIds.ADDRESS_DOJANG, ADDRESS_SCHEMA_UID);
+    }
 }
