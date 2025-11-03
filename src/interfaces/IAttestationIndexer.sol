@@ -69,4 +69,20 @@ interface IAttestationIndexer {
         external
         view
         returns (bytes32);
+
+    /**
+     * @notice Retrieves attestation UIDs indexed by schema, attester, and key
+     * @param schemaUid The UID of the EAS schema
+     * @param attester The attester address of the attestation
+     * @param key The key under which the attestations were indexed
+     * @return attestationUids An array of UIDs of the indexed attestations
+     */
+    function getAttestationUids(
+        bytes32 schemaUid,
+        address attester,
+        bytes32 key
+    )
+        external
+        view
+        returns (bytes32[] memory);
 }

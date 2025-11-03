@@ -36,6 +36,10 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
             => mapping(address attester => mapping(address recipient => mapping(bytes32 key => bytes32 attestationUid)))
     ) private _rawDB;
 
+    /// @dev Internal mapping: schema UID => attester => key => attestation UIDs
+    mapping(bytes32 schemaUid => mapping(address attester => mapping(bytes32 key => bytes32[] attestationUids))) private
+        _keyedDB;
+
     /**
      * @dev Locks the contract, preventing any future reinitialization. This
      * implementation contract was designed to be called through proxies.
@@ -107,6 +111,21 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
     }
 
     /**
+     * @inheritdoc IAttestationIndexer
+     */
+    function getAttestationUids(
+        bytes32 schemaUid,
+        address attester,
+        bytes32 key
+    )
+        external
+        view
+        returns (bytes32[] memory)
+    {
+        return _keyedDB[schemaUid][attester][key];
+    }
+
+    /**
      * @dev Initializes the contract.
      * @param admin The address to be granted with the default admin Role.
      */
@@ -140,6 +159,7 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
         attestation.verify();
 
         _rawDB[attestation.schema][attestation.attester][attestation.recipient][key] = attestationUid;
+        _keyedDB[attestation.schema][attestation.attester][key].push(attestationUid);
         emit AttestationIndexed(attestation.schema, attestation.attester, attestation.recipient, key, attestation.uid);
     }
 }
