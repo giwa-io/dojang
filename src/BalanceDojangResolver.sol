@@ -55,13 +55,6 @@ contract BalanceDojangResolver is
     }
 
     /**
-     * @dev See {ISemver-version}.
-     */
-    function version() external pure returns (string memory) {
-        return "0.1.0";
-    }
-
-    /**
      * @dev Initializes the contract
      * @param admin The address to be granted with the default admin Role
      */
@@ -79,6 +72,12 @@ contract BalanceDojangResolver is
         __BalanceIndexingResolver_init();
 
         _grantRole(AccessControlUpgradeable.DEFAULT_ADMIN_ROLE, admin);
+    }
+
+    /// @notice Semantic version.
+    /// @custom:semver 0.2.0
+    function version() public pure virtual returns (string memory) {
+        return "0.2.0";
     }
 
     /// @inheritdoc SchemaResolverUpgradeable

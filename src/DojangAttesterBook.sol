@@ -5,8 +5,9 @@ import {UUPSUpgradeable} from "@openzeppelin-contracts-upgradeable/proxy/utils/U
 import {AccessControlUpgradeable} from "@openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {ZeroAddress} from "./libraries/Common.sol";
 import {DojangAttesterId} from "./libraries/Types.sol";
+import {ISemver} from "./interfaces/ISemver.sol";
 
-contract DojangAttesterBook is UUPSUpgradeable, AccessControlUpgradeable {
+contract DojangAttesterBook is UUPSUpgradeable, AccessControlUpgradeable, ISemver {
     // 0x635a0c1689ad5a7df2dedc643572aeaf20ebc2ba3151b047c687dd08ef00e591
     bytes32 public constant UPGRADER_ROLE = keccak256("dojang.dojangattesterbook.upgrader");
 
@@ -79,6 +80,12 @@ contract DojangAttesterBook is UUPSUpgradeable, AccessControlUpgradeable {
         __AccessControl_init();
 
         _grantRole(AccessControlUpgradeable.DEFAULT_ADMIN_ROLE, admin);
+    }
+
+    /// @notice Semantic version.
+    /// @custom:semver 0.2.0
+    function version() public pure virtual returns (string memory) {
+        return "0.2.0";
     }
 
     /**

@@ -12,7 +12,7 @@ contract MockAllowlistResolver is AllowlistResolverUpgradeable {
     }
 
     function version() external pure returns (string memory) {
-        return "0.1.0";
+        return "99.0.0";
     }
 
     function allowAttester(address attester) external {
@@ -48,7 +48,7 @@ contract AllowlistResolver_Base is Test {
 
 contract AllowlistResolver_Configure is AllowlistResolver_Base {
     function test_version() public view {
-        assertEq(mockAllowlistResolver.version(), "0.1.0");
+        assertEq(mockAllowlistResolver.version(), "99.0.0");
     }
 
     function test_allowAttester_succeeds() public {

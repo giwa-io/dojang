@@ -49,8 +49,8 @@ contract SchemaBook_Init is SchemaBook_Base {
 }
 
 contract SchemaBookV2 is SchemaBook {
-    function version() public pure returns (uint32) {
-        return 2;
+    function version() public pure override returns (string memory) {
+        return "99.0.0";
     }
 }
 
@@ -68,13 +68,15 @@ contract SchemaBook_Upgrade is SchemaBook_Base {
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
+        assertEq(schemaBook.version(), "0.2.0");
+
         address newImpl = address(new SchemaBookV2());
 
         vm.prank(upgrader);
         schemaBook.upgradeToAndCall(newImpl, bytes(""));
         SchemaBookV2 newSchemaBook = SchemaBookV2(address(schemaBook));
 
-        assertEq(newSchemaBook.version(), 2);
+        assertEq(newSchemaBook.version(), "99.0.0");
     }
 }
 

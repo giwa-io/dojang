@@ -121,7 +121,7 @@ contract BalanceDojangResolver_Configure is BalanceDojangResolver_Base {
     }
 
     function test_version() public view {
-        assertEq(balanceDojangResolver.version(), "0.1.0");
+        assertEq(balanceDojangResolver.version(), "0.2.0");
     }
 }
 

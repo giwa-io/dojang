@@ -12,7 +12,7 @@ contract MockBalanceValidationResolver is BalanceValidationResolverUpgradeable {
     }
 
     function version() external pure returns (string memory) {
-        return "0.1.0";
+        return "99.0.0";
     }
 
     function mockAttest(Attestation calldata attestation) external payable returns (bool) {
@@ -35,7 +35,7 @@ contract BalanceValidationResolver_Base is Test {
 
 contract BalanceValidationResolver_Configure is BalanceValidationResolver_Base {
     function test_version() public view {
-        assertEq(mockBalanceValidationResolver.version(), "0.1.0");
+        assertEq(mockBalanceValidationResolver.version(), "99.0.0");
     }
 }
 

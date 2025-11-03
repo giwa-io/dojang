@@ -13,7 +13,7 @@ contract MockAddressIndexingResolver is AddressIndexingResolverUpgradeable {
     }
 
     function version() external pure returns (string memory) {
-        return "0.1.0";
+        return "99.0.0";
     }
 
     function setIndexer(address indexer) external {
@@ -42,7 +42,7 @@ contract AddressIndexingResolver_Base is Test {
 
 contract AddressIndexingResolver_Configure is AddressIndexingResolver_Base {
     function test_version() public view {
-        assertEq(mockAddressIndexingResolver.version(), "0.1.0");
+        assertEq(mockAddressIndexingResolver.version(), "99.0.0");
     }
 
     function test_setIndexer_revert_when_zeroAddress() public {
