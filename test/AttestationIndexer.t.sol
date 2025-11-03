@@ -166,6 +166,10 @@ contract AttestationIndexer_Test is AttestationIndexer_Base {
         attestationIndexer.index(ATTESTATION_UID);
 
         assertEq(attestationIndexer.getAttestationUid(SCHEMA_UID, attester, RECIPIENT), ATTESTATION_UID);
+        assertEq(
+            attestationIndexer.getAttestationUids(SCHEMA_UID, attester, attestationIndexer.DEFAULT_KEY())[0],
+            ATTESTATION_UID
+        );
     }
 
     function test_index_with_customKey() public {
@@ -184,6 +188,7 @@ contract AttestationIndexer_Test is AttestationIndexer_Base {
         attestationIndexer.index(customKey, ATTESTATION_UID);
 
         assertEq(attestationIndexer.getAttestationUid(SCHEMA_UID, attester, RECIPIENT, customKey), ATTESTATION_UID);
+        assertEq(attestationIndexer.getAttestationUids(SCHEMA_UID, attester, customKey)[0], ATTESTATION_UID);
     }
 
     function test_index_revert_when_attestation_invalid() public {
