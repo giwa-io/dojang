@@ -13,6 +13,7 @@ extra_output = ["storageLayout", "metadata"]
 ffi = true
 fs_permissions = [
     { access='read-write', path='./deployments/' },
+    { access='read', path='./deploy-config/' },
     { access='read', path = './out/' }
 ]
 
