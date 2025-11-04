@@ -19,13 +19,14 @@ import {AttestationVerifier} from "./libraries/AttestationVerifier.sol";
 import {Predeploys, DojangAttesterId, DojangSchemaIds} from "./libraries/Types.sol";
 import {SchemaBook} from "./SchemaBook.sol";
 import {DojangAttesterBook} from "./DojangAttesterBook.sol";
+import {ISemver} from "./interfaces/ISemver.sol";
 
 /**
  * @title Dojang Scroll
  * @notice Provides view access to issued "dojang" via EAS
  * attestations
  */
-contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScroll {
+contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScroll, ISemver {
     using AttestationVerifier for Attestation;
 
     /// @dev Predeployed reference to the EAS contract
@@ -173,6 +174,12 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
         __AccessControl_init();
 
         _grantRole(AccessControlUpgradeable.DEFAULT_ADMIN_ROLE, admin);
+    }
+
+    /// @notice Semantic version.
+    /// @custom:semver 0.2.0
+    function version() public pure virtual returns (string memory) {
+        return "0.2.0";
     }
 
     /**

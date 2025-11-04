@@ -121,7 +121,7 @@ contract AddressDojangResolver_Configure is AddressDojangResolver_Base {
     }
 
     function test_version() public view {
-        assertEq(addressDojangResolver.version(), "0.1.0");
+        assertEq(addressDojangResolver.version(), "0.2.0");
     }
 }
 

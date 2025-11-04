@@ -61,8 +61,8 @@ contract DojangScroll_Init is DojangScroll_Base {
 }
 
 contract DojangScrollV2 is DojangScroll {
-    function version() public pure returns (uint32) {
-        return 2;
+    function version() public pure override returns (string memory) {
+        return "99.0.0";
     }
 }
 
@@ -80,13 +80,15 @@ contract DojangScroll_Upgrade is DojangScroll_Base {
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
+        assertEq(dojangScroll.version(), "0.2.0");
+
         address newImpl = address(new DojangScrollV2());
 
         vm.prank(upgrader);
         dojangScroll.upgradeToAndCall(newImpl, bytes(""));
         DojangScrollV2 newDojangScroll = DojangScrollV2(address(dojangScroll));
 
-        assertEq(newDojangScroll.version(), 2);
+        assertEq(newDojangScroll.version(), "99.0.0");
     }
 }
 

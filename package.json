@@ -1,6 +1,6 @@
 {
   "name": "dojang",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Contracts for Dojang Service",
   "engines": {
     "node": ">=22.0.0"

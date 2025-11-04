@@ -6,8 +6,9 @@ import {AccessControlUpgradeable} from "@openzeppelin-contracts-upgradeable/acce
 import {ZeroAddress} from "./libraries/Common.sol";
 import {ISchemaRegistry} from "@eas-contracts/contracts/ISchemaRegistry.sol";
 import {Predeploys} from "./libraries/Types.sol";
+import {ISemver} from "./interfaces/ISemver.sol";
 
-contract SchemaBook is UUPSUpgradeable, AccessControlUpgradeable {
+contract SchemaBook is UUPSUpgradeable, AccessControlUpgradeable, ISemver {
     /// @dev Predeployed reference to the SchemaRegistry contract
     ISchemaRegistry private constant _SCHEMA_REGISTRY = ISchemaRegistry(Predeploys.SCHEMA_REGISTRY);
 
@@ -102,6 +103,12 @@ contract SchemaBook is UUPSUpgradeable, AccessControlUpgradeable {
         __AccessControl_init();
 
         _grantRole(AccessControlUpgradeable.DEFAULT_ADMIN_ROLE, admin);
+    }
+
+    /// @notice Semantic version.
+    /// @custom:semver 0.2.0
+    function version() public pure virtual returns (string memory) {
+        return "0.2.0";
     }
 
     /**

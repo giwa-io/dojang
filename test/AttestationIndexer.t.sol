@@ -93,8 +93,8 @@ contract AttestationIndexer_Pause is AttestationIndexer_Base {
 }
 
 contract AttestationIndexerV2 is AttestationIndexer {
-    function version() public pure returns (uint32) {
-        return 2;
+    function version() public pure override returns (string memory) {
+        return "99.0.0";
     }
 }
 
@@ -112,13 +112,15 @@ contract AttestationIndexer_Upgrade is AttestationIndexer_Base {
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
+        assertEq(attestationIndexer.version(), "0.2.0");
+
         address newImpl = address(new AttestationIndexerV2());
 
         vm.prank(upgrader);
         attestationIndexer.upgradeToAndCall(newImpl, bytes(""));
         AttestationIndexerV2 newAttestationIndexer = AttestationIndexerV2(address(attestationIndexer));
 
-        assertEq(newAttestationIndexer.version(), 2);
+        assertEq(newAttestationIndexer.version(), "99.0.0");
     }
 }
 

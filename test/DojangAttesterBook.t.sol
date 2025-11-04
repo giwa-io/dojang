@@ -48,8 +48,8 @@ contract DojangAttesterBook_Init is DojangAttesterBook_Base {
 }
 
 contract DojangAttesterBookV2 is DojangAttesterBook {
-    function version() public pure returns (uint8) {
-        return 2;
+    function version() public pure override returns (string memory) {
+        return "99.0.0";
     }
 }
 
@@ -67,13 +67,15 @@ contract DojangAttesterBook_Upgrade is DojangAttesterBook_Base {
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
+        assertEq(attesterBook.version(), "0.2.0");
+
         address newImpl = address(new DojangAttesterBookV2());
 
         vm.prank(upgrader);
         attesterBook.upgradeToAndCall(newImpl, bytes(""));
         DojangAttesterBookV2 newAttesterBook = DojangAttesterBookV2(address(attesterBook));
 
-        assertEq(newAttesterBook.version(), 2);
+        assertEq(newAttesterBook.version(), "99.0.0");
     }
 }
 

@@ -9,12 +9,19 @@ import {IAttestationIndexer} from "./interfaces/IAttestationIndexer.sol";
 import {Predeploys} from "./libraries/Types.sol";
 import {ZeroAddress} from "./libraries/Common.sol";
 import {AttestationVerifier} from "./libraries/AttestationVerifier.sol";
+import {ISemver} from "./interfaces/ISemver.sol";
 
 /**
  * @title Attestation Indexer
  * @notice An indexer for EAS attestation.
  */
-contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, PausableUpgradeable, IAttestationIndexer {
+contract AttestationIndexer is
+    UUPSUpgradeable,
+    AccessControlUpgradeable,
+    PausableUpgradeable,
+    IAttestationIndexer,
+    ISemver
+{
     using AttestationVerifier for Attestation;
 
     /// @dev Predeployed reference to the EAS contract
@@ -139,6 +146,12 @@ contract AttestationIndexer is UUPSUpgradeable, AccessControlUpgradeable, Pausab
         __Pausable_init();
 
         _grantRole(AccessControlUpgradeable.DEFAULT_ADMIN_ROLE, admin);
+    }
+
+    /// @notice Semantic version.
+    /// @custom:semver 0.2.0
+    function version() public pure virtual returns (string memory) {
+        return "0.2.0";
     }
 
     /**
