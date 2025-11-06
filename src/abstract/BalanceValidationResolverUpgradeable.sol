@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {Initializable} from "@openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 import {SchemaResolverUpgradeable} from "./SchemaResolverUpgradeable.sol";
 import {Attestation} from "@eas-contracts/contracts/IEAS.sol";
-import {BIP44CoinTypes} from "../libraries/Types.sol";
+import {CustomCoinTypes} from "../libraries/Types.sol";
 
 /**
  * @title Balance Dojang Validation Resolver for EAS
@@ -12,7 +12,7 @@ import {BIP44CoinTypes} from "../libraries/Types.sol";
  * for balance dojang.
  */
 abstract contract BalanceValidationResolverUpgradeable is Initializable, SchemaResolverUpgradeable {
-    using BIP44CoinTypes for uint256;
+    using CustomCoinTypes for uint256;
 
     function __BalanceValidationResolver_init() internal onlyInitializing {
         __BalanceValidationResolver_init_unchained();
