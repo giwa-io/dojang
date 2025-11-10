@@ -34,13 +34,7 @@ interface IDojangScroll {
      * @param attesterId The attester identifier
      * @return The verified address attestation uid
      */
-    function getVerifiedAddressAttestationUid(
-        address addr,
-        DojangAttesterId attesterId
-    )
-        external
-        view
-        returns (bytes32);
+    function getVerifiedAddressAttestationUid(address addr, DojangAttesterId attesterId) external view returns (bytes32);
 
     /**
      * @notice Returns the verified balance for the given recipient, coin type and timestamp

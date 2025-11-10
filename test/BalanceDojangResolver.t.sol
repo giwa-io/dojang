@@ -121,7 +121,7 @@ contract BalanceDojangResolver_Configure is BalanceDojangResolver_Base {
     }
 
     function test_version() public view {
-        assertEq(balanceDojangResolver.version(), "0.2.0");
+        assertEq(balanceDojangResolver.version(), "0.3.0");
     }
 }
 
@@ -131,7 +131,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
 
     address internal attester;
     address internal constant INDEXER = address(0x1234);
-    uint256 internal constant BITCOIN_COIN_TYPE = 0;
+    uint256 internal constant BTC_COIN_TYPE = 0x0300000000000000000000000000000000000000000000000000000000435442;
     address internal constant RECIPIENT = address(0x5678);
     uint64 internal constant SNAPSHOT_AT = 1_700_000_000 - 5 minutes;
     uint256 internal constant BALANCE = 10_000_000_000_000_000_000;
@@ -165,7 +165,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
                 expirationTime: uint64(block.timestamp) + 5 minutes,
                 revocable: true,
                 refUID: 0x0,
-                data: abi.encode(BITCOIN_COIN_TYPE, SNAPSHOT_AT, BALANCE),
+                data: abi.encode(BTC_COIN_TYPE, SNAPSHOT_AT, BALANCE),
                 value: 0
             })
         });
@@ -174,7 +174,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
     function test_onAttest_false_when_validationFailed() public {
         vm.expectRevert(EAS.InvalidAttestation.selector);
 
-        attestationRequest.data.data = abi.encode(BITCOIN_COIN_TYPE, block.timestamp + 1, BALANCE);
+        attestationRequest.data.data = abi.encode(BTC_COIN_TYPE, block.timestamp + 1, BALANCE);
 
         vm.prank(attester);
         eas.attest(attestationRequest);
@@ -188,7 +188,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
     }
 
     function test_onAttest_false_when_indexingFailed() public {
-        bytes32 key = keccak256(abi.encode(BITCOIN_COIN_TYPE, SNAPSHOT_AT));
+        bytes32 key = keccak256(abi.encode(BTC_COIN_TYPE, SNAPSHOT_AT));
         vm.mockCallRevert(
             INDEXER,
             abi.encodeWithSelector(
@@ -228,7 +228,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
     }
 
     function test_onAttest_true() public {
-        bytes32 key = keccak256(abi.encode(BITCOIN_COIN_TYPE, SNAPSHOT_AT));
+        bytes32 key = keccak256(abi.encode(BTC_COIN_TYPE, SNAPSHOT_AT));
         vm.mockCall(
             INDEXER,
             abi.encodeWithSelector(
@@ -256,7 +256,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
     }
 
     function test_onRevoke_true() public {
-        bytes32 key = keccak256(abi.encode(BITCOIN_COIN_TYPE, SNAPSHOT_AT));
+        bytes32 key = keccak256(abi.encode(BTC_COIN_TYPE, SNAPSHOT_AT));
         vm.mockCall(
             INDEXER,
             abi.encodeWithSelector(

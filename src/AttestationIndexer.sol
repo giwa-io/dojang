@@ -89,15 +89,7 @@ contract AttestationIndexer is
     /**
      * @inheritdoc IAttestationIndexer
      */
-    function getAttestationUid(
-        bytes32 schemaUid,
-        address attester,
-        address recipient
-    )
-        external
-        view
-        returns (bytes32)
-    {
+    function getAttestationUid(bytes32 schemaUid, address attester, address recipient) external view returns (bytes32) {
         return _rawDB[schemaUid][attester][recipient][DEFAULT_KEY];
     }
 

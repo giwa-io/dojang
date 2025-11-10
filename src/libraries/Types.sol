@@ -50,6 +50,108 @@ library BIP44CoinTypes {
 }
 
 /**
+ * @title CustomCoinTypes
+ * @notice Efficient on-chain representation of custom coin types based on ASCII tickers.
+ * @dev
+ * Encoding format:
+ *   - MSB: ticker length (1–31)
+ *   - Lower bytes (little-endian): ASCII characters of the ticker
+ *   - All remaining higher bytes beyond length must be zero.
+ *
+ * Example:
+ *   "ETH" → 0x03...00485445
+ *           |   |     └────── "H" "T" "E" (LE)
+ *           |   └──────────── length = 3
+ *           └──────────────── remaining bytes = zero
+ */
+library CustomCoinTypes {
+    uint8 internal constant MAX_TICKER_LEN = 31;
+    uint256 private constant PAYLOAD_MASK = 0x00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+
+    /**
+     * @notice Emitted when an invalid coin type is provided
+     * @param coinType The invalid coin type that triggered the error
+     */
+    error InvalidCoinType(uint256 coinType);
+
+    /**
+     * @notice Emitted when given ticker length is invalid
+     * @param length Ticker length
+     */
+    error InvalidTickerLength(uint256 length);
+
+    /**
+     * @notice Emitted when given ticker character is invalid
+     * @param ch Ticker character
+     */
+    error InvalidTickerChar(uint8 ch);
+
+    function toCoinType(string memory ticker) internal pure returns (uint256) {
+        bytes memory b = bytes(ticker);
+        uint256 len = b.length;
+        if (len == 0 || len > MAX_TICKER_LEN) {
+            revert InvalidTickerLength(len);
+        }
+
+        uint256 payload = 0;
+        unchecked {
+            for (uint256 i = 0; i < len; ++i) {
+                uint8 ch = uint8(b[i]);
+                if (ch < 0x21 || ch > 0x7E) {
+                    revert InvalidTickerChar(ch);
+                }
+                payload |= uint256(ch) << (8 * i);
+            }
+        }
+
+        return (uint256(uint8(len)) << 248) | payload;
+    }
+
+    function toTicker(uint256 coinType) internal pure returns (string memory) {
+        bytes memory b = _toTicker(coinType);
+        if (b.length == 0) {
+            revert InvalidCoinType(coinType);
+        }
+        return string(b);
+    }
+
+    function isValid(uint256 coinType) internal pure returns (bool) {
+        return _toTicker(coinType).length != 0;
+    }
+
+    function requireValid(uint256 coinType) internal pure {
+        if (!isValid(coinType)) {
+            revert InvalidCoinType(coinType);
+        }
+    }
+
+    function _toTicker(uint256 coinType) private pure returns (bytes memory) {
+        uint8 len = uint8(coinType >> 248);
+        if (len == 0 || len > MAX_TICKER_LEN) {
+            return bytes("");
+        }
+
+        uint256 payload = coinType & PAYLOAD_MASK;
+        if (payload >> (uint256(len) * 8) != 0) {
+            return bytes("");
+        }
+
+        bytes memory out = new bytes(len);
+        unchecked {
+            for (uint256 i = 0; i < len; ++i) {
+                uint8 ch = uint8(payload >> (8 * i));
+                if (ch < 0x21 || ch > 0x7E) {
+                    return bytes("");
+                }
+                out[i] = bytes1(ch);
+            }
+        }
+
+        return out;
+    }
+}
+
+/**
  * @dev Dojang EAS schema identifiers
  *
  * This library defines canonical schema IDs used by the Dojang service.

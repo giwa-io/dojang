@@ -43,14 +43,7 @@ interface IAttestationIndexer {
      * @param recipient The recipient address of the attestation
      * @return attestationUid The UID of the indexed attestation
      */
-    function getAttestationUid(
-        bytes32 schemaUid,
-        address attester,
-        address recipient
-    )
-        external
-        view
-        returns (bytes32);
+    function getAttestationUid(bytes32 schemaUid, address attester, address recipient) external view returns (bytes32);
 
     /**
      * @notice Retrieves an attestation UID indexed by schema, attester, recipient and key

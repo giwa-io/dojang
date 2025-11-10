@@ -40,7 +40,7 @@ contract BalanceValidationResolver_Configure is BalanceValidationResolver_Base {
 }
 
 contract BalanceIndexingResolver_Test is BalanceValidationResolver_Base {
-    uint256 internal constant BITCOIN_COIN_TYPE = 0;
+    uint256 internal constant BTC_COIN_TYPE = 0x0300000000000000000000000000000000000000000000000000000000435442;
     uint256 internal constant BALANCE = 10_000_000_000_000_000_000;
 
     function setUp() public override {
@@ -51,7 +51,7 @@ contract BalanceIndexingResolver_Test is BalanceValidationResolver_Base {
     function test_onAttest_false_for_snapshotAt_future() public {
         Attestation memory attestation;
         attestation.uid = bytes32("uid");
-        attestation.data = abi.encode(BITCOIN_COIN_TYPE, 1_700_000_000 + 1, BALANCE);
+        attestation.data = abi.encode(BTC_COIN_TYPE, 1_700_000_000 + 1, BALANCE);
 
         assertFalse(mockBalanceValidationResolver.mockAttest(attestation));
     }
@@ -59,7 +59,7 @@ contract BalanceIndexingResolver_Test is BalanceValidationResolver_Base {
     function test_onAttest_false_for_invalid_coinType() public {
         Attestation memory attestation;
         attestation.uid = bytes32("uid");
-        attestation.data = abi.encode(1 + 1 << 31, 1_700_000_000 - 1, BALANCE);
+        attestation.data = abi.encode(1 << 31 + 1, 1_700_000_000 - 1, BALANCE);
 
         assertFalse(mockBalanceValidationResolver.mockAttest(attestation));
     }
@@ -67,7 +67,7 @@ contract BalanceIndexingResolver_Test is BalanceValidationResolver_Base {
     function test_onAttest_true() public {
         Attestation memory attestation;
         attestation.uid = bytes32("uid");
-        attestation.data = abi.encode(BITCOIN_COIN_TYPE, 1_700_000_000 - 1, BALANCE);
+        attestation.data = abi.encode(BTC_COIN_TYPE, 1_700_000_000 - 1, BALANCE);
 
         assertTrue(mockBalanceValidationResolver.mockAttest(attestation));
     }

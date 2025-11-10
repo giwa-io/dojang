@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
       - name: get node version
         id: node-version
-        run: echo node-version=$(cat contracts/.node-version) >> $GITHUB_OUTPUT
+        run: echo node-version=$(cat .node-version) >> $GITHUB_OUTPUT
     outputs:
       node-version: ${{ steps.node-version.outputs.node-version }}
 
