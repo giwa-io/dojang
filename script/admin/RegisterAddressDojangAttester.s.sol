@@ -9,7 +9,6 @@ import {DojangAttesterId} from "../../src/libraries/Types.sol";
 
 contract RegisterAddressDojangAttester is Script, DeployConfig {
     uint256 internal adminKey = vm.envUint("ADMIN_PRIVATE_KEY");
-    address internal admin = vm.addr(adminKey);
 
     function run(address attester, bytes32 attesterId) public {
         DojangAttesterBook dojangAttesterBook = DojangAttesterBook(getAddress(".DojangAttesterBook"));
