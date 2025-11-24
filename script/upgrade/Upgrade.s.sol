@@ -26,6 +26,12 @@ contract Upgrade is Script, DeployConfig {
         upgradeUUPSContract(
             getAddress(".BalanceDojangResolver"), "BalanceDojangResolver.sol", new bytes(0), new bytes(0)
         );
+        if (keyExists(".BalanceRootDojangResolver")) {
+            upgradeUUPSContract(
+                getAddress(".BalanceRootDojangResolver"), "BalanceRootDojangResolver.sol", new bytes(0), new bytes(0)
+            );
+        }
+
         upgradeUUPSContract(getAddress(".DojangScroll"), "DojangScroll.sol", new bytes(0), new bytes(0));
     }
 

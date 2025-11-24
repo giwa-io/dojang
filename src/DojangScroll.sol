@@ -118,6 +118,23 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     /**
      * @inheritdoc IDojangScroll
      */
+    function getBalanceRootAttestationUid(
+        uint256 coinType,
+        uint64 snapshotAt,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (bytes32)
+    {
+        Attestation memory attestation = _getBalanceRootAttestation(coinType, snapshotAt, attesterId);
+        attestation.verify();
+        return attestation.uid;
+    }
+
+    /**
+     * @inheritdoc IDojangScroll
+     */
     function getVerifiedBalance(
         address recipient,
         uint256 coinType,
@@ -130,13 +147,17 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     {
         Attestation memory attestation = _getBalanceAttestation(recipient, coinType, snapshotAt, attesterId);
         attestation.verify();
+        Attestation memory rootAttestation = _getBalanceRootAttestation(coinType, snapshotAt, attesterId);
+        rootAttestation.verify();
 
-        uint256 decodedCoinType;
-        uint64 decodedSnapshotAt;
-        uint256 decodedBalance;
-        (decodedCoinType, decodedSnapshotAt, decodedBalance) = abi.decode(attestation.data, (uint256, uint64, uint256));
+        (uint256 decodedCoinType, uint64 decodedSnapshotAt,,,) =
+            abi.decode(rootAttestation.data, (uint256, uint64, uint192, uint256, bytes32));
+        (uint256 decodedBalance,,) = abi.decode(attestation.data, (uint256, bytes32, bytes32[]));
 
-        if (decodedCoinType != coinType || decodedSnapshotAt != snapshotAt) {
+        if (
+            rootAttestation.uid != attestation.refUID || decodedCoinType != coinType || decodedSnapshotAt != snapshotAt
+                || attestation.recipient != recipient
+        ) {
             revert NotVerifiedBalance(recipient, coinType, snapshotAt);
         }
 
@@ -177,9 +198,9 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     }
 
     /// @notice Semantic version.
-    /// @custom:semver 0.2.0
+    /// @custom:semver 0.4.0
     function version() public pure virtual returns (string memory) {
-        return "0.2.0";
+        return "0.4.0";
     }
 
     /**
@@ -209,6 +230,31 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
         address attesterAddress = _dojangAttesterBook.getAttester(attesterId);
 
         bytes32 attestationUid = _indexer.getAttestationUid(easSchemaUid, attesterAddress, addr);
+        return _EAS.getAttestation(attestationUid);
+    }
+
+    /**
+     * @notice Returns the balance root attestation for the given coin type and timestamp.
+     * @dev This function does not verify the existence or validity of the attestation.
+     * @param coinType The BIP-44 coin type of the asset
+     * @param snapshotAt The timestamp representing when the balance snapshot was taken
+     * @param attesterId The attester identifier
+     * @return The balance root attestation
+     */
+    function _getBalanceRootAttestation(
+        uint256 coinType,
+        uint64 snapshotAt,
+        DojangAttesterId attesterId
+    )
+        internal
+        view
+        returns (Attestation memory)
+    {
+        bytes32 easSchemaUid = _schemaBook.getSchemaUid(DojangSchemaIds.BALANCE_ROOT_DOJANG);
+        address attesterAddress = _dojangAttesterBook.getAttester(attesterId);
+
+        bytes32 key = keccak256(abi.encode(coinType, snapshotAt));
+        bytes32 attestationUid = _indexer.getAttestationUid(easSchemaUid, attesterAddress, address(0), key);
         return _EAS.getAttestation(attestationUid);
     }
 

@@ -80,7 +80,7 @@ contract DojangScroll_Upgrade is DojangScroll_Base {
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
-        assertEq(dojangScroll.version(), "0.2.0");
+        assertEq(dojangScroll.version(), "0.4.0");
 
         address newImpl = address(new DojangScrollV2());
 
@@ -180,11 +180,13 @@ contract DojangScroll_Configure is DojangScroll_Base {
 
 contract DojangScroll_Test is DojangScroll_Base {
     Attestation internal addressAttestation;
+    Attestation internal balanceRootAttestation;
     Attestation internal balanceAttestation;
 
     address internal constant SCHEMA_BOOK = address(0x0011);
     address internal constant DOJANG_ATTESTER_BOOK = address(0x0022);
     bytes32 internal constant ADDRESS_DOJANG_SCHEMA_UID = bytes32("address_dojang");
+    bytes32 internal constant BALANCE_ROOT_DOJANG_SCHEMA_UID = bytes32("balance_root_dojang");
     bytes32 internal constant BALANCE_DOJANG_SCHEMA_UID = bytes32("balance_dojang");
 
     address internal attester;
@@ -194,9 +196,10 @@ contract DojangScroll_Test is DojangScroll_Base {
     address internal constant ADDRESS = 0x685933139dE0F4153D32247376e068E156bBA440;
 
     bytes32 internal constant ADDRESS_ATTESTATION_UID = bytes32("address");
+    bytes32 internal constant BALANCE_ROOT_ATTESTATION_UID = bytes32("balance_root");
     bytes32 internal constant BALANCE_ATTESTATION_UID = bytes32("balance");
 
-    uint256 internal constant SOLANA_COIN_TYPE = 501;
+    uint256 internal constant SOLANA_COIN_TYPE = 0x3000000000000000000000000000000000000000000000000000000004c4f53;
 
     uint64 internal constant SNAPSHOT_AT = 1_700_000_000 - 5 minutes;
     uint256 internal constant BALANCE = 10_000_000_000_000_000_000;
@@ -226,6 +229,20 @@ contract DojangScroll_Test is DojangScroll_Base {
             revocable: true
         });
 
+        balanceRootAttestation = Attestation({
+            uid: BALANCE_ROOT_ATTESTATION_UID,
+            schema: BALANCE_ROOT_DOJANG_SCHEMA_UID,
+            recipient: address(0),
+            attester: attester,
+            time: uint64(block.timestamp),
+            expirationTime: uint64(block.timestamp) + 12,
+            revocationTime: 0,
+            refUID: bytes32(0),
+            data: abi.encode(SOLANA_COIN_TYPE, SNAPSHOT_AT, uint192(1), uint256(1), bytes32(0)),
+            revocable: true
+        });
+
+        bytes32[] memory proofs;
         balanceAttestation = Attestation({
             uid: BALANCE_ATTESTATION_UID,
             schema: BALANCE_DOJANG_SCHEMA_UID,
@@ -234,8 +251,8 @@ contract DojangScroll_Test is DojangScroll_Base {
             time: uint64(block.timestamp),
             expirationTime: uint64(block.timestamp) + 12,
             revocationTime: 0,
-            refUID: bytes32(0),
-            data: abi.encode(SOLANA_COIN_TYPE, SNAPSHOT_AT, BALANCE),
+            refUID: BALANCE_ROOT_ATTESTATION_UID,
+            data: abi.encode(BALANCE, bytes32(0), proofs),
             revocable: true
         });
     }
@@ -258,6 +275,35 @@ contract DojangScroll_Test is DojangScroll_Base {
                 ADDRESS_DOJANG_SCHEMA_UID,
                 attester,
                 ADDRESS
+            ),
+            abi.encode(attestation.uid)
+        );
+        vm.mockCall(
+            Predeploys.EAS,
+            abi.encodeWithSelector(IEAS.getAttestation.selector, attestation.uid),
+            abi.encode(attestation)
+        );
+    }
+
+    function mockGetBalanceRootAttestation(Attestation memory attestation) internal {
+        vm.mockCall(
+            SCHEMA_BOOK,
+            abi.encodeWithSelector(SchemaBook.getSchemaUid.selector, DojangSchemaIds.BALANCE_ROOT_DOJANG),
+            abi.encode(BALANCE_ROOT_DOJANG_SCHEMA_UID)
+        );
+        vm.mockCall(
+            DOJANG_ATTESTER_BOOK,
+            abi.encodeWithSelector(DojangAttesterBook.getAttester.selector, DojangAttesterIds.UPBIT_KOREA),
+            abi.encode(attester)
+        );
+        vm.mockCall(
+            INDEXER,
+            abi.encodeWithSelector(
+                bytes4(keccak256("getAttestationUid(bytes32,address,address,bytes32)")),
+                BALANCE_ROOT_DOJANG_SCHEMA_UID,
+                attester,
+                address(0),
+                keccak256(abi.encode(SOLANA_COIN_TYPE, SNAPSHOT_AT))
             ),
             abi.encode(attestation.uid)
         );
@@ -367,6 +413,50 @@ contract DojangScroll_Test is DojangScroll_Base {
         assertEq(attestationUid, ADDRESS_ATTESTATION_UID);
     }
 
+    function test_getBalanceRootAttestationUid_revert_when_notExistAttestation() public {
+        Attestation memory zeroAttestation;
+        mockGetBalanceRootAttestation(zeroAttestation);
+
+        vm.expectRevert(AttestationVerifier.ZeroUid.selector);
+        dojangScroll.getBalanceRootAttestationUid(SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getBalanceRootAttestationUid_revert_when_expiredAttestation() public {
+        balanceRootAttestation.expirationTime = uint64(block.timestamp) - 5 minutes;
+        mockGetBalanceRootAttestation(balanceRootAttestation);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AttestationVerifier.ExpiredAttestation.selector,
+                BALANCE_ROOT_ATTESTATION_UID,
+                uint64(block.timestamp) - 5 minutes
+            )
+        );
+        dojangScroll.getBalanceRootAttestationUid(SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getBalanceRootAttestationUid_revert_when_revokedAttestation() public {
+        balanceRootAttestation.revocationTime = uint64(block.timestamp) - 5 minutes;
+        mockGetBalanceRootAttestation(balanceRootAttestation);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AttestationVerifier.RevokedAttestation.selector,
+                BALANCE_ROOT_ATTESTATION_UID,
+                uint64(block.timestamp) - 5 minutes
+            )
+        );
+        dojangScroll.getBalanceRootAttestationUid(SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getBalanceRootAttestationUid_succeeds() public {
+        mockGetBalanceRootAttestation(balanceRootAttestation);
+
+        bytes32 attestationUid =
+            dojangScroll.getBalanceRootAttestationUid(SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+        assertEq(attestationUid, BALANCE_ROOT_ATTESTATION_UID);
+    }
+
     function test_getVerifiedBalance_revert_when_notExistAttestation() public {
         Attestation memory zeroAttestation;
         mockGetBalanceAttestation(zeroAttestation);
@@ -401,8 +491,10 @@ contract DojangScroll_Test is DojangScroll_Base {
 
     function test_getVerifiedBalance_revert_when_notMatchData() public {
         uint256 otherSnapshotTime = block.timestamp - 100 minutes;
-        balanceAttestation.data = abi.encode(SOLANA_COIN_TYPE, otherSnapshotTime, BALANCE);
+        balanceRootAttestation.data =
+            abi.encode(SOLANA_COIN_TYPE, otherSnapshotTime, uint192(1), uint256(1), bytes32(0));
         mockGetBalanceAttestation(balanceAttestation);
+        mockGetBalanceRootAttestation(balanceRootAttestation);
 
         vm.expectRevert(
             abi.encodeWithSelector(IDojangScroll.NotVerifiedBalance.selector, ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT)
@@ -412,6 +504,7 @@ contract DojangScroll_Test is DojangScroll_Base {
 
     function test_getVerifiedBalance_succeeds() public {
         mockGetBalanceAttestation(balanceAttestation);
+        mockGetBalanceRootAttestation(balanceRootAttestation);
 
         uint256 balance =
             dojangScroll.getVerifiedBalance(ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);

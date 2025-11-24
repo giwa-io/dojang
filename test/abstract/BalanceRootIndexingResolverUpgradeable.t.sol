@@ -4,13 +4,12 @@ pragma solidity ^0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {IndexerUpdated, InvalidIndexer} from "../../src/libraries/Common.sol";
 import {Attestation} from "@eas-contracts/contracts/IEAS.sol";
-import {BalanceIndexingResolverUpgradeable} from "../../src/abstract/BalanceIndexingResolverUpgradeable.sol";
-import {Predeploys} from "src/libraries/Types.sol";
+import {BalanceRootIndexingResolverUpgradeable} from "../../src/abstract/BalanceRootIndexingResolverUpgradeable.sol";
 
-contract MockBalanceIndexingResolver is BalanceIndexingResolverUpgradeable {
+contract MockBalanceRootIndexingResolver is BalanceRootIndexingResolverUpgradeable {
     function initialize() public initializer {
         __SchemaResolver_init();
-        __BalanceIndexingResolver_init();
+        __BalanceRootIndexingResolver_init();
     }
 
     function version() external pure returns (string memory) {
@@ -30,80 +29,62 @@ contract MockBalanceIndexingResolver is BalanceIndexingResolverUpgradeable {
     }
 }
 
-contract BalanceIndexingResolver_Base is Test {
-    MockBalanceIndexingResolver public mockBalanceIndexingResolver;
+contract BalanceRootIndexingResolver_Base is Test {
+    MockBalanceRootIndexingResolver public mockBalanceRootIndexingResolver;
 
     address internal constant INDEXER = address(0x1234);
 
     function setUp() public virtual {
-        mockBalanceIndexingResolver = new MockBalanceIndexingResolver();
-        mockBalanceIndexingResolver.initialize();
+        mockBalanceRootIndexingResolver = new MockBalanceRootIndexingResolver();
+        mockBalanceRootIndexingResolver.initialize();
     }
 }
 
-contract BalanceIndexingResolver_Configure is BalanceIndexingResolver_Base {
+contract BalanceRootIndexingResolver_Configure is BalanceRootIndexingResolver_Base {
     function test_version() public view {
-        assertEq(mockBalanceIndexingResolver.version(), "99.0.0");
+        assertEq(mockBalanceRootIndexingResolver.version(), "99.0.0");
     }
 
     function test_setIndexer_revert_when_zeroAddress() public {
         vm.expectRevert(InvalidIndexer.selector);
-        mockBalanceIndexingResolver.setIndexer(address(0));
+        mockBalanceRootIndexingResolver.setIndexer(address(0));
     }
 
     function test_setIndexer_revert_when_sameAddress() public {
-        mockBalanceIndexingResolver.setIndexer(INDEXER);
+        mockBalanceRootIndexingResolver.setIndexer(INDEXER);
 
         vm.expectRevert(InvalidIndexer.selector);
-        mockBalanceIndexingResolver.setIndexer(INDEXER);
+        mockBalanceRootIndexingResolver.setIndexer(INDEXER);
     }
 
     function test_setIndexer_succeeds() public {
-        mockBalanceIndexingResolver.setIndexer(INDEXER);
+        mockBalanceRootIndexingResolver.setIndexer(INDEXER);
 
         address newIndexer = vm.randomAddress();
 
         vm.expectEmit(true, true, true, true);
         emit IndexerUpdated(INDEXER, newIndexer);
 
-        mockBalanceIndexingResolver.setIndexer(newIndexer);
+        mockBalanceRootIndexingResolver.setIndexer(newIndexer);
     }
 }
 
-contract BalanceIndexingResolver_Test is BalanceIndexingResolver_Base {
+contract BalanceRootIndexingResolver_Test is BalanceRootIndexingResolver_Base {
     uint256 internal constant BITCOIN_COIN_TYPE = 0;
     uint64 internal constant SNAPSHOT_AT = 1_750_307_050;
-    bytes32 internal constant REF_UID = bytes32("refUID");
-    bytes internal constant REF_DATA = abi.encode(BITCOIN_COIN_TYPE, SNAPSHOT_AT, uint192(0), uint256(0), bytes32(0));
+    uint192 internal constant LEAF_COUNT = 1_000_000;
+    uint256 internal constant TOTAL_AMOUNT = 10_000_000_000_000_000_000;
+    bytes32 internal constant ROOT = bytes32("root");
 
     function setUp() public override {
         super.setUp();
-        mockBalanceIndexingResolver.setIndexer(INDEXER);
+        mockBalanceRootIndexingResolver.setIndexer(INDEXER);
     }
 
     function test_onAttest_true_for_balanceDojangAttestation() public {
         Attestation memory attestation;
-        attestation.refUID = REF_UID;
         attestation.uid = bytes32("uid");
-
-        vm.mockCall(
-            Predeploys.EAS,
-            abi.encodeWithSelector(bytes4(keccak256("getAttestation(bytes32)")), attestation.refUID),
-            abi.encode(
-                Attestation({
-                    uid: attestation.refUID,
-                    schema: bytes32(0),
-                    time: 0,
-                    expirationTime: 0,
-                    revocationTime: 0,
-                    refUID: bytes32(0),
-                    data: REF_DATA,
-                    attester: address(0),
-                    revocable: true,
-                    recipient: address(0)
-                })
-            )
-        );
+        attestation.data = abi.encode(BITCOIN_COIN_TYPE, SNAPSHOT_AT, LEAF_COUNT, TOTAL_AMOUNT, ROOT);
 
         bytes32 key = keccak256(abi.encode(BITCOIN_COIN_TYPE, SNAPSHOT_AT));
         vm.mockCall(
@@ -112,10 +93,10 @@ contract BalanceIndexingResolver_Test is BalanceIndexingResolver_Base {
             bytes("")
         );
 
-        assertTrue(mockBalanceIndexingResolver.mockAttest(attestation));
+        assertTrue(mockBalanceRootIndexingResolver.mockAttest(attestation));
     }
 
     function testFuzz_onRevoke_alwaysTrue(Attestation memory attestation) public {
-        assertTrue(mockBalanceIndexingResolver.mockRevoke(attestation));
+        assertTrue(mockBalanceRootIndexingResolver.mockRevoke(attestation));
     }
 }

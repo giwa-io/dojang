@@ -4,22 +4,22 @@ pragma solidity ^0.8.28;
 import {UUPSUpgradeable} from "@openzeppelin-contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin-contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {SchemaResolverUpgradeable} from "./abstract/SchemaResolverUpgradeable.sol";
-import {BalanceValidationResolverUpgradeable} from "./abstract/BalanceValidationResolverUpgradeable.sol";
+import {BalanceRootValidationResolverUpgradeable} from "./abstract/BalanceRootValidationResolverUpgradeable.sol";
 import {AllowlistResolverUpgradeable} from "./abstract/AllowlistResolverUpgradeable.sol";
-import {BalanceIndexingResolverUpgradeable} from "./abstract/BalanceIndexingResolverUpgradeable.sol";
+import {BalanceRootIndexingResolverUpgradeable} from "./abstract/BalanceRootIndexingResolverUpgradeable.sol";
 import {ZeroAddress} from "./libraries/Common.sol";
 import {Attestation} from "@eas-contracts/contracts/IEAS.sol";
 
-contract BalanceDojangResolver is
+contract BalanceRootDojangResolver is
     UUPSUpgradeable,
     AccessControlUpgradeable,
     SchemaResolverUpgradeable,
-    BalanceValidationResolverUpgradeable,
+    BalanceRootValidationResolverUpgradeable,
     AllowlistResolverUpgradeable,
-    BalanceIndexingResolverUpgradeable
+    BalanceRootIndexingResolverUpgradeable
 {
-    // 0x8421c86537ca8724814af8dd9a3536c8129b6f4ebed2c873a3cb4c7f1ef851b1
-    bytes32 public constant UPGRADER_ROLE = keccak256("dojang.balancedojangresolver.upgrader");
+    // 0x5b437c77573c20c7ba441302748381a65e029cf6e602320d44b325b937c3dd9c
+    bytes32 public constant UPGRADER_ROLE = keccak256("dojang.balancerootdojangresolver.upgrader");
 
     /**
      * @dev Locks the contract, preventing any future reinitialization. This
@@ -55,14 +55,6 @@ contract BalanceDojangResolver is
     }
 
     /**
-     * @notice Updates the balance root schema UID
-     * @param uid The new balance root schema UID
-     */
-    function setBalanceRootSchemaUID(bytes32 uid) external onlyRole(AccessControlUpgradeable.DEFAULT_ADMIN_ROLE) {
-        _setBalanceRootSchemaUID(uid);
-    }
-
-    /**
      * @dev Initializes the contract
      * @param admin The address to be granted with the default admin Role
      */
@@ -75,9 +67,9 @@ contract BalanceDojangResolver is
         __AccessControl_init();
 
         __SchemaResolver_init();
-        __BalanceValidationResolver_init();
+        __BalanceRootValidationResolver_init();
         __AllowlistResolver_init();
-        __BalanceIndexingResolver_init();
+        __BalanceRootIndexingResolver_init();
 
         _grantRole(AccessControlUpgradeable.DEFAULT_ADMIN_ROLE, admin);
     }
@@ -89,8 +81,8 @@ contract BalanceDojangResolver is
     }
 
     /// @inheritdoc SchemaResolverUpgradeable
-    /// @dev See {BalanceValidationResolverUpgradeable-onAttest}, {AllowlistResolverUpgradeable-onAttest}, and
-    /// {BalanceIndexingResolverUpgradeable-onAttest}.
+    /// @dev See {BalanceRootValidationResolverUpgradeable-onAttest}, {AllowlistResolverUpgradeable-onAttest}, and
+    /// {BalanceRootIndexingResolverUpgradeable-onAttest}.
     function onAttest(
         Attestation calldata attestation,
         uint256 value
@@ -98,20 +90,20 @@ contract BalanceDojangResolver is
         internal
         override(
             SchemaResolverUpgradeable,
-            BalanceValidationResolverUpgradeable,
+            BalanceRootValidationResolverUpgradeable,
             AllowlistResolverUpgradeable,
-            BalanceIndexingResolverUpgradeable
+            BalanceRootIndexingResolverUpgradeable
         )
         returns (bool)
     {
-        return BalanceValidationResolverUpgradeable.onAttest(attestation, value)
+        return BalanceRootValidationResolverUpgradeable.onAttest(attestation, value)
             && AllowlistResolverUpgradeable.onAttest(attestation, value)
-            && BalanceIndexingResolverUpgradeable.onAttest(attestation, value);
+            && BalanceRootIndexingResolverUpgradeable.onAttest(attestation, value);
     }
 
     /// @inheritdoc SchemaResolverUpgradeable
-    /// @dev See {BalanceValidationResolverUpgradeable-onRevoke}, {AllowlistResolverUpgradeable-onRevoke}, and
-    /// {BalanceIndexingResolverUpgradeable-onRevoke}.
+    /// @dev See {BalanceRootValidationResolverUpgradeable-onRevoke}, {AllowlistResolverUpgradeable-onRevoke}, and
+    /// {BalanceRootIndexingResolverUpgradeable-onRevoke}.
     function onRevoke(
         Attestation calldata attestation,
         uint256 value
@@ -119,15 +111,15 @@ contract BalanceDojangResolver is
         internal
         override(
             SchemaResolverUpgradeable,
-            BalanceValidationResolverUpgradeable,
+            BalanceRootValidationResolverUpgradeable,
             AllowlistResolverUpgradeable,
-            BalanceIndexingResolverUpgradeable
+            BalanceRootIndexingResolverUpgradeable
         )
         returns (bool)
     {
-        return BalanceValidationResolverUpgradeable.onRevoke(attestation, value)
+        return BalanceRootValidationResolverUpgradeable.onRevoke(attestation, value)
             && AllowlistResolverUpgradeable.onRevoke(attestation, value)
-            && BalanceIndexingResolverUpgradeable.onRevoke(attestation, value);
+            && BalanceRootIndexingResolverUpgradeable.onRevoke(attestation, value);
     }
 
     /**

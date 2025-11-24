@@ -2,7 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
-import {BalanceDojangResolver} from "../src/BalanceDojangResolver.sol";
+import {BalanceRootDojangResolver} from "../src/BalanceRootDojangResolver.sol";
 import {ERC1967Proxy} from "@openzeppelin-contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Initializable} from "@openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IndexerUpdated, ZeroAddress} from "../src/libraries/Common.sol";
@@ -10,21 +10,16 @@ import {IAccessControl} from "@openzeppelin-contracts/access/IAccessControl.sol"
 import {SchemaRegistry} from "@eas-contracts/contracts/SchemaRegistry.sol";
 import {EAS} from "@eas-contracts/contracts/EAS.sol";
 import {
-    Attestation,
     AttestationRequest,
     AttestationRequestData,
-    DelegatedAttestationRequest,
     RevocationRequest,
-    RevocationRequestData,
-    Signature
+    RevocationRequestData
 } from "@eas-contracts/contracts/IEAS.sol";
 import {AllowlistResolverUpgradeable} from "../src/abstract/AllowlistResolverUpgradeable.sol";
-import {BalanceValidationResolverUpgradeable} from "src/abstract/BalanceValidationResolverUpgradeable.sol";
 import {Predeploys} from "../src/libraries/Types.sol";
-import {MessageHashUtils} from "@openzeppelin-contracts/utils/cryptography/MessageHashUtils.sol";
 
-contract BalanceDojangResolver_Base is Test {
-    BalanceDojangResolver public balanceDojangResolver;
+contract BalanceRootDojangResolver_Base is Test {
+    BalanceRootDojangResolver public balanceRootDojangResolver;
     address internal admin;
     address internal upgrader;
     address internal alice;
@@ -34,65 +29,67 @@ contract BalanceDojangResolver_Base is Test {
         upgrader = makeAddr("upgrader");
         alice = makeAddr("alice");
 
-        address impl = address(new BalanceDojangResolver());
-        bytes memory initData = abi.encodeCall(BalanceDojangResolver.initialize, admin);
+        address impl = address(new BalanceRootDojangResolver());
+        bytes memory initData = abi.encodeCall(BalanceRootDojangResolver.initialize, admin);
         address proxy = address(new ERC1967Proxy(impl, initData));
 
-        balanceDojangResolver = BalanceDojangResolver(payable(proxy));
+        balanceRootDojangResolver = BalanceRootDojangResolver(payable(proxy));
 
         vm.startPrank(admin);
-        balanceDojangResolver.grantRole(balanceDojangResolver.UPGRADER_ROLE(), upgrader);
+        balanceRootDojangResolver.grantRole(balanceRootDojangResolver.UPGRADER_ROLE(), upgrader);
         vm.stopPrank();
     }
 }
 
-contract BalanceDojangResolver_Init is BalanceDojangResolver_Base {
+contract BalanceRootDojangResolver_Init is BalanceRootDojangResolver_Base {
     function test_initialize_revert_for_reinitialize() public {
         vm.expectRevert(Initializable.InvalidInitialization.selector);
-        balanceDojangResolver.initialize(alice);
+        balanceRootDojangResolver.initialize(alice);
     }
 
     function test_initialize_revert_for_invalidAdmin() public {
-        address impl = address(new BalanceDojangResolver());
-        bytes memory initData = abi.encodeCall(BalanceDojangResolver.initialize, address(0));
+        address impl = address(new BalanceRootDojangResolver());
+        bytes memory initData = abi.encodeCall(BalanceRootDojangResolver.initialize, address(0));
 
         vm.expectRevert(ZeroAddress.selector);
         new ERC1967Proxy(impl, initData);
     }
 }
 
-contract BalanceDojangResolverV2 is BalanceDojangResolver {
+contract BalanceRootDojangResolverV2 is BalanceRootDojangResolver {
     function v2Function() public pure returns (bool) {
         return true;
     }
 }
 
-contract BalanceDojangResolver_Upgrade is BalanceDojangResolver_Base {
+contract BalanceRootDojangResolver_Upgrade is BalanceRootDojangResolver_Base {
     function test_upgrade_revert_by_notUpgrader() public {
-        address newImpl = address(new BalanceDojangResolverV2());
+        address newImpl = address(new BalanceRootDojangResolverV2());
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                IAccessControl.AccessControlUnauthorizedAccount.selector, alice, balanceDojangResolver.UPGRADER_ROLE()
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                alice,
+                balanceRootDojangResolver.UPGRADER_ROLE()
             )
         );
         vm.prank(alice);
-        balanceDojangResolver.upgradeToAndCall(newImpl, bytes(""));
+        balanceRootDojangResolver.upgradeToAndCall(newImpl, bytes(""));
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
-        address newImpl = address(new BalanceDojangResolverV2());
+        address newImpl = address(new BalanceRootDojangResolverV2());
 
         vm.prank(upgrader);
-        balanceDojangResolver.upgradeToAndCall(newImpl, bytes(""));
-        BalanceDojangResolverV2 newBalanceDojangResolver =
-            BalanceDojangResolverV2(payable(address(balanceDojangResolver)));
+        balanceRootDojangResolver.upgradeToAndCall(newImpl, bytes(""));
+        BalanceRootDojangResolverV2 newBalanceRootDojangResolver =
+            BalanceRootDojangResolverV2(payable(address(balanceRootDojangResolver)));
 
-        assertTrue(newBalanceDojangResolver.v2Function());
+        assertTrue(newBalanceRootDojangResolver.v2Function());
     }
 }
 
-contract BalanceDojangResolver_Configure is BalanceDojangResolver_Base {
+contract BalanceRootDojangResolver_Configure is BalanceRootDojangResolver_Base {
     function test_allowAttester_succeeds() public {
         address attester = vm.randomAddress();
 
@@ -100,19 +97,19 @@ contract BalanceDojangResolver_Configure is BalanceDojangResolver_Base {
         emit AllowlistResolverUpgradeable.AttesterAllowed(attester);
 
         vm.prank(admin);
-        balanceDojangResolver.allowAttester(attester);
+        balanceRootDojangResolver.allowAttester(attester);
     }
 
     function test_removeAttester_succeeds() public {
         address attester = vm.randomAddress();
         vm.prank(admin);
-        balanceDojangResolver.allowAttester(attester);
+        balanceRootDojangResolver.allowAttester(attester);
 
         vm.expectEmit(true, true, true, true);
         emit AllowlistResolverUpgradeable.AttesterRemoved(attester);
 
         vm.prank(admin);
-        balanceDojangResolver.removeAttester(attester);
+        balanceRootDojangResolver.removeAttester(attester);
     }
 
     function test_setIndexer_succeeds() public {
@@ -122,41 +119,25 @@ contract BalanceDojangResolver_Configure is BalanceDojangResolver_Base {
         emit IndexerUpdated(address(0), indexer);
 
         vm.prank(admin);
-        balanceDojangResolver.setIndexer(indexer);
-    }
-
-    function test_setBalanceRootSchemaUID_succeeds() public {
-        bytes32 schemaUID = keccak256(abi.encodePacked("test schema"));
-
-        vm.expectEmit(true, true, true, true);
-        emit BalanceValidationResolverUpgradeable.BalanceRootSchemaUIDUpdated(bytes32(0), schemaUID);
-
-        vm.prank(admin);
-        balanceDojangResolver.setBalanceRootSchemaUID(schemaUID);
+        balanceRootDojangResolver.setIndexer(indexer);
     }
 
     function test_version() public view {
-        assertEq(balanceDojangResolver.version(), "0.4.0");
+        assertEq(balanceRootDojangResolver.version(), "0.4.0");
     }
 }
 
-contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
+contract BalanceRootDojangResolver_Test is BalanceRootDojangResolver_Base {
     SchemaRegistry internal schemaRegistry;
     EAS internal eas;
 
     address internal attester;
     address internal constant INDEXER = address(0x1234);
-
-    bytes32 internal constant BALANCE_ROOT_SCHEMA_UID = keccak256("BALANCE_ROOT_SCHEMA_UID");
     uint256 internal constant BTC_COIN_TYPE = 0x0300000000000000000000000000000000000000000000000000000000435442;
     uint64 internal constant SNAPSHOT_AT = 1_700_000_000 - 5 minutes;
-    bytes32 internal constant ROOT = 0xd4205e580ec0284840a0b5f7706fe1647965417a45d7a1d1a8d7a90ae40bdcce;
-    bytes32 internal constant REF_UID = keccak256("refUID");
-
-    address internal constant RECIPIENT = address(0x1234);
-    uint256 internal constant BALANCE = 10_000_000_000_000_000_000;
-    bytes32 internal constant SALT = keccak256("salt");
-    bytes32[] internal PROOFS = new bytes32[](3);
+    uint192 internal constant LEAF_COUNT = 1_000_000;
+    uint256 internal constant TOTAL_AMOUNT = 10_000_000_000_000_000_000;
+    bytes32 internal constant ROOT = keccak256("root");
 
     bytes32 internal schemaUid;
     AttestationRequest internal attestationRequest;
@@ -164,10 +145,6 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
     function setUp() public override {
         super.setUp();
         vm.warp(1_700_000_000);
-
-        PROOFS[0] = bytes32(0x00ad81533b36a6fee8fd154f598637471c82c59e10d8f6c31d6661929fbd8f92);
-        PROOFS[1] = bytes32(0xdea38148395b88e4c454154adc5a69242c8fe345e352ecbe1418078bfd119623);
-        PROOFS[2] = bytes32(0x66b17509ac7c30cb130b3ec65dfc7cfb49a220b9a6aa00ec07002a6f732e9486);
 
         schemaRegistry = new SchemaRegistry();
         EAS tempEas = new EAS(schemaRegistry);
@@ -177,40 +154,24 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
         attester = makeAddr("attester");
 
         vm.startPrank(admin);
-        balanceDojangResolver.allowAttester(attester);
-        balanceDojangResolver.setIndexer(INDEXER);
-        balanceDojangResolver.setBalanceRootSchemaUID(BALANCE_ROOT_SCHEMA_UID);
+        balanceRootDojangResolver.allowAttester(attester);
+        balanceRootDojangResolver.setIndexer(INDEXER);
         vm.stopPrank();
 
-        schemaUid =
-            schemaRegistry.register("uint256 balance,bytes32 salt,bytes32[] proofs", balanceDojangResolver, true);
-
-        uint256 easSlot = uint256(keccak256(abi.encode(REF_UID, 4))); // mapping(bytes32 => Attestation) slot is 4
-
-        vm.store(address(eas), bytes32(easSlot), REF_UID);
-
-        vm.store(address(eas), bytes32(easSlot + 1), BALANCE_ROOT_SCHEMA_UID);
-
-        vm.store(
-            address(eas),
-            bytes32(easSlot + 6),
-            bytes32(uint256(0xa0) * 2 + 1) // data length
+        schemaUid = schemaRegistry.register(
+            "uint256 coinType,uint64 snapshotAt,uint192 leafCount,uint256 totalAmount,bytes32 root",
+            balanceRootDojangResolver,
+            true
         );
-
-        vm.store(address(eas), bytes32(uint256(keccak256(abi.encode(easSlot + 6)))), bytes32(BTC_COIN_TYPE));
-
-        vm.store(address(eas), bytes32(uint256(keccak256(abi.encode(easSlot + 6))) + 1), bytes32(uint256(SNAPSHOT_AT)));
-
-        vm.store(address(eas), bytes32(uint256(keccak256(abi.encode(easSlot + 6))) + 4), ROOT);
 
         attestationRequest = AttestationRequest({
             schema: schemaUid,
             data: AttestationRequestData({
-                recipient: RECIPIENT,
-                expirationTime: uint64(block.timestamp) + 5 minutes,
+                recipient: address(0),
+                expirationTime: 0,
                 revocable: true,
-                refUID: REF_UID,
-                data: abi.encode(BALANCE, SALT, PROOFS),
+                refUID: 0x0,
+                data: abi.encode(BTC_COIN_TYPE, SNAPSHOT_AT, LEAF_COUNT, TOTAL_AMOUNT, ROOT),
                 value: 0
             })
         });
@@ -219,7 +180,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
     function test_onAttest_false_when_validationFailed() public {
         vm.expectRevert(EAS.InvalidAttestation.selector);
 
-        attestationRequest.data.data = abi.encode(BALANCE, SALT, new bytes32[](0));
+        attestationRequest.data.data = abi.encode(BTC_COIN_TYPE, block.timestamp + 1, LEAF_COUNT, TOTAL_AMOUNT, ROOT);
 
         vm.prank(attester);
         eas.attest(attestationRequest);
@@ -255,7 +216,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
             ),
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
-                address(balanceDojangResolver),
+                address(balanceRootDojangResolver),
                 bytes32(0x12871cff13e82f1629feba448a7c66e21bef7c90d20deb75fea29020b75d749a)
             )
         );
@@ -263,7 +224,7 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IAccessControl.AccessControlUnauthorizedAccount.selector,
-                address(balanceDojangResolver),
+                address(balanceRootDojangResolver),
                 bytes32(0x12871cff13e82f1629feba448a7c66e21bef7c90d20deb75fea29020b75d749a)
             )
         );
@@ -298,65 +259,6 @@ contract BalanceDojangResolver_Test is BalanceDojangResolver_Base {
 
         vm.prank(attester);
         eas.attest(attestationRequest);
-    }
-
-    function test_onAttest_delegatedAttest_succeed() public {
-        bytes32 key = keccak256(abi.encode(BTC_COIN_TYPE, SNAPSHOT_AT));
-        vm.mockCall(
-            INDEXER,
-            abi.encodeWithSelector(
-                bytes4(keccak256("index(bytes32,bytes32)")),
-                key,
-                keccak256(
-                    abi.encodePacked(
-                        attestationRequest.schema,
-                        attestationRequest.data.recipient,
-                        attester,
-                        uint64(block.timestamp),
-                        attestationRequest.data.expirationTime,
-                        attestationRequest.data.revocable,
-                        attestationRequest.data.refUID,
-                        attestationRequest.data.data,
-                        uint32(0)
-                    )
-                )
-            ),
-            bytes("")
-        );
-
-        (, uint256 attesterKey) = makeAddrAndKey("attester");
-        uint256 nonce = eas.getNonce(attester);
-        bytes32 hash = MessageHashUtils.toTypedDataHash(
-            eas.getDomainSeparator(),
-            keccak256(
-                abi.encode(
-                    eas.getAttestTypeHash(),
-                    attester,
-                    attestationRequest.schema,
-                    attestationRequest.data.recipient,
-                    attestationRequest.data.expirationTime,
-                    attestationRequest.data.revocable,
-                    attestationRequest.data.refUID,
-                    keccak256(attestationRequest.data.data),
-                    attestationRequest.data.value,
-                    nonce,
-                    uint64(type(uint64).max)
-                )
-            )
-        );
-
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(attesterKey, hash);
-
-        DelegatedAttestationRequest memory request = DelegatedAttestationRequest({
-            schema: attestationRequest.schema,
-            data: attestationRequest.data,
-            signature: Signature({v: v, r: r, s: s}),
-            attester: attester,
-            deadline: type(uint64).max
-        });
-
-        vm.prank(alice);
-        eas.attestByDelegation(request);
     }
 
     function test_onRevoke_true() public {

@@ -13,7 +13,7 @@ import {Predeploys} from "../libraries/Types.sol";
  */
 abstract contract SchemaResolverUpgradeable is Initializable, ISchemaResolver {
     /// @dev Predeployed reference to the EAS contract
-    IEAS private constant _EAS = IEAS(Predeploys.EAS);
+    IEAS internal constant _EAS = IEAS(Predeploys.EAS);
 
     error AccessDenied();
     error NotPayable();
