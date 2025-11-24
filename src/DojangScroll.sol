@@ -236,7 +236,7 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     /**
      * @notice Returns the balance root attestation for the given coin type and timestamp.
      * @dev This function does not verify the existence or validity of the attestation.
-     * @param coinType The BIP-44 coin type of the asset
+     * @param coinType The coin type of the asset
      * @param snapshotAt The timestamp representing when the balance snapshot was taken
      * @param attesterId The attester identifier
      * @return The balance root attestation
@@ -262,7 +262,7 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
      * @notice Returns the address attestation for the given recipient, coin type and timestamp.
      * @dev This function does not verify the existence or validity of the attestation.
      * @param recipient The address of the user
-     * @param coinType The BIP-44 coin type of the asset
+     * @param coinType The coin type of the asset
      * @param snapshotAt The timestamp representing when the balance snapshot was taken
      * @param attesterId The attester identifier
      * @return The balance attestation
