@@ -11,9 +11,16 @@ interface IDojangScroll {
     error NotVerifiedAddress(address addr);
 
     /**
+     * @notice Emitted when a balance root is not found
+     * @param coinType The custom coin type (ticker encoded as uint256)
+     * @param snapshotAt The timestamp representing when the balance snapshot was taken
+     */
+    error BalanceRootNotFound(uint256 coinType, uint64 snapshotAt);
+
+    /**
      * @notice Emitted when a balance is not verified
      * @param recipient The recipient address
-     * @param coinType The BIP-44 coin type
+     * @param coinType The custom coin type (ticker encoded as uint256)
      * @param snapshotAt The timestamp representing when the balance snapshot was taken
      */
     error NotVerifiedBalance(address recipient, uint256 coinType, uint64 snapshotAt);
@@ -37,10 +44,26 @@ interface IDojangScroll {
     function getVerifiedAddressAttestationUid(address addr, DojangAttesterId attesterId) external view returns (bytes32);
 
     /**
+     * @notice Returns the balance root attestation uid for the given coin type and timestamp
+     * @dev Reverts if no balance root attestation exists for the given combination
+     * @param coinType The custom coin type (ticker encoded as uint256) of the asset
+     * @param snapshotAt The timestamp representing when the balance snapshot was taken
+     * @param attesterId The attester identifier
+     */
+    function getBalanceRootAttestationUid(
+        uint256 coinType,
+        uint64 snapshotAt,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (bytes32);
+
+    /**
      * @notice Returns the verified balance for the given recipient, coin type and timestamp
      * @dev Reverts if no verified attestation exists for the given combination
      * @param recipient The address of the user
-     * @param coinType The BIP-44 coin type of the asset
+     * @param coinType The custom coin type (ticker encoded as uint256) of the asset
      * @param snapshotAt The timestamp representing when the balance snapshot was taken
      * @param attesterId The attester identifier
      * @return The balance amount, denominated in the smallest unit of the asset (i.e., according to the coinType's
@@ -60,7 +83,7 @@ interface IDojangScroll {
      * @notice Returns the verified balance attestation uid for the given recipient, coin type and timestamp
      * @dev Reverts if no verified attestation exists for the given combination
      * @param recipient The address of the user
-     * @param coinType The BIP-44 coin type of the asset
+     * @param coinType The custom coin type (ticker encoded as uint256) of the asset
      * @param snapshotAt The timestamp representing when the balance snapshot was taken
      * @param attesterId The attester identifier
      * @return The verified balance attestation uid

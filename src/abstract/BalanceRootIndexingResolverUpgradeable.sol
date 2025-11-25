@@ -8,28 +8,28 @@ import {IAttestationIndexer} from "../interfaces/IAttestationIndexer.sol";
 import {IndexerUpdated, InvalidIndexer} from "../libraries/Common.sol";
 
 /**
- * @title Balance Dojang Indexing Resolver for EAS
+ * @title Balance Root Dojang Indexing Resolver for EAS
  * @dev A base contract for creating an EAS Schema Resolver that indexes attestations
- * for balance dojang.
+ * for balance root dojang.
  */
-abstract contract BalanceIndexingResolverUpgradeable is Initializable, SchemaResolverUpgradeable {
-    /// @custom:storage-location erc7201:dojang.storage.BalanceIndexingResolverUpgradeable
-    struct BalanceIndexingResolverStorage {
+abstract contract BalanceRootIndexingResolverUpgradeable is Initializable, SchemaResolverUpgradeable {
+    /// @custom:storage-location erc7201:dojang.storage.BalanceRootIndexingResolverUpgradeable
+    struct BalanceRootIndexingResolverStorage {
         IAttestationIndexer indexer;
     }
 
     /// @notice
-    /// keccak256(abi.encode(uint256(keccak256("dojang.storage.BalanceIndexingResolverUpgradeable"))
+    /// keccak256(abi.encode(uint256(keccak256("dojang.storage.BalanceRootIndexingResolverUpgradeable"))
     /// - 1)) & ~bytes32(uint256(0xff))
-    bytes32 private constant BALANCE_INDEXING_RESOLVER_STORAGE_LOCATION =
-        0x1daeb03bc251932f84305b1d992090c50f663b400469e848b99f0e227fbdb200;
+    bytes32 private constant BALANCE_ROOT_INDEXING_RESOLVER_STORAGE_LOCATION =
+        0x44f120633ccf0f854028131b81d579e99e6e4df5270421d3e7204395a7a75900;
 
-    function __BalanceIndexingResolver_init() internal onlyInitializing {
-        __BalanceIndexingResolver_init_unchained();
+    function __BalanceRootIndexingResolver_init() internal onlyInitializing {
+        __BalanceRootIndexingResolver_init_unchained();
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function __BalanceIndexingResolver_init_unchained() internal onlyInitializing {}
+    function __BalanceRootIndexingResolver_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev Extracts attestation data and indexes it with UID via the
@@ -41,10 +41,10 @@ abstract contract BalanceIndexingResolverUpgradeable is Initializable, SchemaRes
      * reverting.
      */
     function onAttest(Attestation calldata attestation, uint256) internal virtual override returns (bool) {
-        BalanceIndexingResolverStorage storage $ = _getBalanceIndexingResolverStorage();
+        BalanceRootIndexingResolverStorage storage $ = _getBalanceRootIndexingResolverStorage();
 
-        Attestation memory root = _EAS.getAttestation(attestation.refUID);
-        (uint256 coinType, uint64 snapshotAt,,,) = abi.decode(root.data, (uint256, uint64, uint192, uint256, bytes32));
+        (uint256 coinType, uint64 snapshotAt,,,) =
+            abi.decode(attestation.data, (uint256, uint64, uint192, uint256, bytes32));
 
         bytes32 key = keccak256(abi.encode(coinType, snapshotAt));
         $.indexer.index(key, attestation.uid);
@@ -70,7 +70,7 @@ abstract contract BalanceIndexingResolverUpgradeable is Initializable, SchemaRes
      * @param indexer The address of the new IAttestationIndexer
      */
     function _setIndexer(address indexer) internal {
-        BalanceIndexingResolverStorage storage $ = _getBalanceIndexingResolverStorage();
+        BalanceRootIndexingResolverStorage storage $ = _getBalanceRootIndexingResolverStorage();
 
         if (indexer == address(0) || indexer == address($.indexer)) {
             revert InvalidIndexer();
@@ -80,9 +80,13 @@ abstract contract BalanceIndexingResolverUpgradeable is Initializable, SchemaRes
         emit IndexerUpdated(prevIndexer, address($.indexer));
     }
 
-    function _getBalanceIndexingResolverStorage() private pure returns (BalanceIndexingResolverStorage storage $) {
+    function _getBalanceRootIndexingResolverStorage()
+        private
+        pure
+        returns (BalanceRootIndexingResolverStorage storage $)
+    {
         assembly {
-            $.slot := BALANCE_INDEXING_RESOLVER_STORAGE_LOCATION
+            $.slot := BALANCE_ROOT_INDEXING_RESOLVER_STORAGE_LOCATION
         }
     }
 }
