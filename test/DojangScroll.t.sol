@@ -80,7 +80,7 @@ contract DojangScroll_Upgrade is DojangScroll_Base {
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
-        assertEq(dojangScroll.version(), "0.4.0");
+        assertEq(dojangScroll.version(), "0.5.0");
 
         address newImpl = address(new DojangScrollV2());
 
@@ -182,12 +182,14 @@ contract DojangScroll_Test is DojangScroll_Base {
     Attestation internal addressAttestation;
     Attestation internal balanceRootAttestation;
     Attestation internal balanceAttestation;
+    Attestation internal verifyCodeAttestation;
 
     address internal constant SCHEMA_BOOK = address(0x0011);
     address internal constant DOJANG_ATTESTER_BOOK = address(0x0022);
     bytes32 internal constant ADDRESS_DOJANG_SCHEMA_UID = bytes32("address_dojang");
     bytes32 internal constant BALANCE_ROOT_DOJANG_SCHEMA_UID = bytes32("balance_root_dojang");
     bytes32 internal constant BALANCE_DOJANG_SCHEMA_UID = bytes32("balance_dojang");
+    bytes32 internal constant VERIFY_CODE_DOJANG_SCHEMA_UID = bytes32("verify_code_dojang");
 
     address internal attester;
 
@@ -198,11 +200,14 @@ contract DojangScroll_Test is DojangScroll_Base {
     bytes32 internal constant ADDRESS_ATTESTATION_UID = bytes32("address");
     bytes32 internal constant BALANCE_ROOT_ATTESTATION_UID = bytes32("balance_root");
     bytes32 internal constant BALANCE_ATTESTATION_UID = bytes32("balance");
+    bytes32 internal constant VERIFY_CODE_ATTESTATION_UID = bytes32("verify_code");
 
     uint256 internal constant SOLANA_COIN_TYPE = 0x3000000000000000000000000000000000000000000000000000000004c4f53;
 
     uint64 internal constant SNAPSHOT_AT = 1_700_000_000 - 5 minutes;
     uint256 internal constant BALANCE = 10_000_000_000_000_000_000;
+    bytes32 internal constant CODE_HASH = keccak256(bytes("rawcode"));
+    string internal constant DOMAIN = "foo.bar";
 
     function setUp() public override {
         super.setUp();
@@ -253,6 +258,19 @@ contract DojangScroll_Test is DojangScroll_Base {
             revocationTime: 0,
             refUID: BALANCE_ROOT_ATTESTATION_UID,
             data: abi.encode(BALANCE, bytes32(0), proofs),
+            revocable: true
+        });
+
+        verifyCodeAttestation = Attestation({
+            uid: VERIFY_CODE_ATTESTATION_UID,
+            schema: VERIFY_CODE_DOJANG_SCHEMA_UID,
+            recipient: address(0),
+            attester: attester,
+            time: uint64(block.timestamp),
+            expirationTime: uint64(block.timestamp) + 12,
+            revocationTime: 0,
+            refUID: bytes32(0),
+            data: abi.encode(CODE_HASH, DOMAIN),
             revocable: true
         });
     }
@@ -333,6 +351,35 @@ contract DojangScroll_Test is DojangScroll_Base {
                 attester,
                 ADDRESS,
                 keccak256(abi.encode(SOLANA_COIN_TYPE, SNAPSHOT_AT))
+            ),
+            abi.encode(attestation.uid)
+        );
+        vm.mockCall(
+            Predeploys.EAS,
+            abi.encodeWithSelector(IEAS.getAttestation.selector, attestation.uid),
+            abi.encode(attestation)
+        );
+    }
+
+    function mockGetVerifyCodeAttestation(Attestation memory attestation) internal {
+        vm.mockCall(
+            SCHEMA_BOOK,
+            abi.encodeWithSelector(SchemaBook.getSchemaUid.selector, DojangSchemaIds.VERIFY_CODE_DOJANG),
+            abi.encode(VERIFY_CODE_DOJANG_SCHEMA_UID)
+        );
+        vm.mockCall(
+            DOJANG_ATTESTER_BOOK,
+            abi.encodeWithSelector(DojangAttesterBook.getAttester.selector, DojangAttesterIds.UPBIT_KOREA),
+            abi.encode(attester)
+        );
+        vm.mockCall(
+            INDEXER,
+            abi.encodeWithSelector(
+                bytes4(keccak256("getAttestationUid(bytes32,address,address,bytes32)")),
+                VERIFY_CODE_DOJANG_SCHEMA_UID,
+                attester,
+                address(0),
+                keccak256(abi.encode(CODE_HASH, DOMAIN))
             ),
             abi.encode(attestation.uid)
         );
@@ -560,5 +607,76 @@ contract DojangScroll_Test is DojangScroll_Base {
             ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA
         );
         assertEq(attestationUid, BALANCE_ATTESTATION_UID);
+    }
+
+    function test_isVerifiedCode_false_when_notExistAttestation() public {
+        Attestation memory zeroAttestation;
+        mockGetVerifyCodeAttestation(zeroAttestation);
+
+        vm.assertFalse(dojangScroll.isVerifiedCode(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA));
+    }
+
+    function test_isVerifiedCode_false_when_expiredAttestation() public {
+        verifyCodeAttestation.expirationTime = uint64(block.timestamp) - 5 minutes;
+        mockGetVerifyCodeAttestation(verifyCodeAttestation);
+
+        vm.assertFalse(dojangScroll.isVerifiedCode(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA));
+    }
+
+    function test_isVerifiedCode_false_when_revokedAttestation() public {
+        verifyCodeAttestation.revocationTime = uint64(block.timestamp) - 5 minutes;
+        mockGetVerifyCodeAttestation(verifyCodeAttestation);
+
+        vm.assertFalse(dojangScroll.isVerifiedCode(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA));
+    }
+
+    function test_isVerifiedCode_true() public {
+        mockGetVerifyCodeAttestation(verifyCodeAttestation);
+
+        vm.assertTrue(dojangScroll.isVerifiedCode(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA));
+    }
+
+    function test_getVerifyCodeAttestationUid_revert_when_notExistAttestation() public {
+        Attestation memory zeroAttestation;
+        mockGetVerifyCodeAttestation(zeroAttestation);
+
+        vm.expectRevert(AttestationVerifier.ZeroUid.selector);
+        dojangScroll.getVerifyCodeAttestationUid(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getVerifyCodeAttestationUid_revert_when_expiredAttestation() public {
+        verifyCodeAttestation.expirationTime = uint64(block.timestamp) - 5 minutes;
+        mockGetVerifyCodeAttestation(verifyCodeAttestation);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AttestationVerifier.ExpiredAttestation.selector,
+                VERIFY_CODE_ATTESTATION_UID,
+                uint64(block.timestamp) - 5 minutes
+            )
+        );
+        dojangScroll.getVerifyCodeAttestationUid(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getVerifyCodeAttestationUid_revert_when_revokedAttestation() public {
+        verifyCodeAttestation.revocationTime = uint64(block.timestamp) - 5 minutes;
+        mockGetVerifyCodeAttestation(verifyCodeAttestation);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AttestationVerifier.RevokedAttestation.selector,
+                VERIFY_CODE_ATTESTATION_UID,
+                uint64(block.timestamp) - 5 minutes
+            )
+        );
+        dojangScroll.getVerifyCodeAttestationUid(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getVerifyCodeAttestationUid_succeeds() public {
+        mockGetVerifyCodeAttestation(verifyCodeAttestation);
+
+        bytes32 attestationUid =
+            dojangScroll.getVerifyCodeAttestationUid(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA);
+        assertEq(attestationUid, VERIFY_CODE_ATTESTATION_UID);
     }
 }
