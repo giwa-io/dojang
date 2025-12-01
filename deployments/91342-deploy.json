@@ -5,5 +5,6 @@
   "DojangAttesterBook": "0xDA282E89244424E297Ce8e78089B54D043FB28B6",
   "DojangScroll": "0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9",
   "SchemaBook": "0x78cBb3413FBb6aF05EF1D21e646440e56baE3AD6",
-  "BalanceRootDojangResolver": "0xD90a964aB65bc02397De1E7fcBd230803bC1bEd0"
+  "BalanceRootDojangResolver": "0xD90a964aB65bc02397De1E7fcBd230803bC1bEd0",
+  "VerifyCodeDojangResolver": "0x843fF433f7657901118fF3E2Eca915abb9BC12Df"
 }

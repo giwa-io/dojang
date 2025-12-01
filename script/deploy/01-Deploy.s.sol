@@ -14,6 +14,7 @@ import {AddressDojangResolver} from "src/AddressDojangResolver.sol";
 import {DojangScroll} from "src/DojangScroll.sol";
 import {BalanceDojangResolver} from "../../src/BalanceDojangResolver.sol";
 import {BalanceRootDojangResolver} from "../../src/BalanceRootDojangResolver.sol";
+import {VerifyCodeDojangResolver} from "../../src/VerifyCodeDojangResolver.sol";
 
 contract Deploy is Script, Artifacts {
     uint256 internal deployerKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
@@ -32,6 +33,7 @@ contract Deploy is Script, Artifacts {
     string internal constant BALANCE_ROOT_DOJANG_SCHEMA =
         "uint256 coinType,uint64 snapshotAt,uint192 leafCount,uint256 totalAmount,bytes32 root";
     string internal constant BALANCE_DOJANG_SCHEMA = "uint256 balance,bytes32 salt,bytes32[] proofs";
+    string internal constant VERIFY_CODE_DOJANG_SCHEMA = "bytes32 codeHash,string domain";
 
     ISchemaRegistry internal schemaRegistry = ISchemaRegistry(Predeploys.SCHEMA_REGISTRY);
     IEAS internal eas = IEAS(Predeploys.EAS);
@@ -96,6 +98,13 @@ contract Deploy is Script, Artifacts {
         save("BalanceRootDojangResolver", proxy);
     }
 
+    function deployVerifyCodeDojangResolver() public broadcast(deployerKey) {
+        address proxy = Upgrades.deployUUPSProxy(
+            "VerifyCodeDojangResolver.sol", abi.encodeCall(VerifyCodeDojangResolver.initialize, admin)
+        );
+        save("VerifyCodeDojangResolver", proxy);
+    }
+
     function deployBalanceDojangResolver() public broadcast(deployerKey) {
         address proxy = Upgrades.deployUUPSProxy(
             "BalanceDojangResolver.sol", abi.encodeCall(BalanceDojangResolver.initialize, admin)
@@ -145,6 +154,12 @@ contract Deploy is Script, Artifacts {
         balanceRootDojangResolver.grantRole(balanceRootDojangResolver.UPGRADER_ROLE(), upgrader);
     }
 
+    function grantRoleVerifyCodeDojangResolver() public broadcast(adminKey) {
+        VerifyCodeDojangResolver verifyCodeDojangResolver =
+            VerifyCodeDojangResolver(mustGetAddress("VerifyCodeDojangResolver"));
+        verifyCodeDojangResolver.grantRole(verifyCodeDojangResolver.UPGRADER_ROLE(), upgrader);
+    }
+
     function grantRoleDojangScroll() public broadcast(adminKey) {
         DojangScroll dojangScroll = DojangScroll(mustGetAddress("DojangScroll"));
         dojangScroll.grantRole(dojangScroll.UPGRADER_ROLE(), upgrader);
@@ -158,11 +173,14 @@ contract Deploy is Script, Artifacts {
         BalanceDojangResolver balanceDojangResolver = BalanceDojangResolver(mustGetAddress("BalanceDojangResolver"));
         BalanceRootDojangResolver balanceRootDojangResolver =
             BalanceRootDojangResolver(mustGetAddress("BalanceRootDojangResolver"));
+        VerifyCodeDojangResolver verifyCodeDojangResolver =
+            VerifyCodeDojangResolver(mustGetAddress("VerifyCodeDojangResolver"));
         DojangScroll dojangScroll = DojangScroll(mustGetAddress("DojangScroll"));
 
         addressDojangResolver.setIndexer(address(attestationIndexer));
         balanceDojangResolver.setIndexer(address(attestationIndexer));
         balanceRootDojangResolver.setIndexer(address(attestationIndexer));
+        verifyCodeDojangResolver.setIndexer(address(attestationIndexer));
 
         dojangScroll.setSchemaBook(address(schemaBook));
         dojangScroll.setDojangAttesterBook(address(dojangAttesterBook));
@@ -177,7 +195,9 @@ contract Deploy is Script, Artifacts {
         bytes32 balanceRootSchemaUid =
             schemaRegistry.register(BALANCE_ROOT_DOJANG_SCHEMA, balanceRootDojangResolver, true);
         schemaBook.register(DojangSchemaIds.BALANCE_ROOT_DOJANG, balanceRootSchemaUid);
-
         balanceDojangResolver.setBalanceRootSchemaUID(balanceRootSchemaUid);
+
+        bytes32 verifyCodeSchemaUid = schemaRegistry.register(VERIFY_CODE_DOJANG_SCHEMA, verifyCodeDojangResolver, true);
+        schemaBook.register(DojangSchemaIds.VERIFY_CODE_DOJANG, verifyCodeSchemaUid);
     }
 }
