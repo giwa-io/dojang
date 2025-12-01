@@ -166,6 +166,9 @@ library DojangSchemaIds {
 
     // 0xf09c1384d860519bb4ea5bb2a45ab64b00a8d900d47fb79203663be6da21e06c
     bytes32 public constant BALANCE_ROOT_DOJANG = keccak256("dojang.dojangschemaids.balanceroot");
+
+    // 0x68053e055c01ce9b3577f3162b36324bb195ebcb574c48e823480d205f06af9b
+    bytes32 public constant VERIFY_CODE_DOJANG = keccak256("dojang.dojangschemaids.verifycode");
 }
 
 /**
