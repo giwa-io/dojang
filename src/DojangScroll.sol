@@ -183,6 +183,38 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     }
 
     /**
+     * @inheritdoc IDojangScroll
+     */
+    function isVerifiedCode(
+        bytes32 codeHash,
+        string calldata domain,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (bool)
+    {
+        return _getVerifyCodeAttestation(codeHash, domain, attesterId).isVerified();
+    }
+
+    /**
+     * @inheritdoc IDojangScroll
+     */
+    function getVerifyCodeAttestationUid(
+        bytes32 codeHash,
+        string calldata domain,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (bytes32)
+    {
+        Attestation memory attestation = _getVerifyCodeAttestation(codeHash, domain, attesterId);
+        attestation.verify();
+        return attestation.uid;
+    }
+
+    /**
      * @dev Initializes the contract
      * @param admin The address to be granted with the default admin Role
      */
@@ -198,9 +230,9 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     }
 
     /// @notice Semantic version.
-    /// @custom:semver 0.4.0
+    /// @custom:semver 0.5.0
     function version() public pure virtual returns (string memory) {
-        return "0.4.0";
+        return "0.5.0";
     }
 
     /**
@@ -282,6 +314,31 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
 
         bytes32 key = keccak256(abi.encode(coinType, snapshotAt));
         bytes32 attestationUid = _indexer.getAttestationUid(easSchemaUid, attesterAddress, recipient, key);
+        return _EAS.getAttestation(attestationUid);
+    }
+
+    /**
+     * @notice Returns the verify-code attestation for the given codeHash and domain.
+     * @dev This function does not verify the existence or validity of the attestation.
+     * @param codeHash The hashed verification code
+     * @param domain The domain string associated with the verification code; should be canonicalized
+     * @param attesterId The attester identifier
+     * @return The verify-code attestation
+     */
+    function _getVerifyCodeAttestation(
+        bytes32 codeHash,
+        string memory domain,
+        DojangAttesterId attesterId
+    )
+        internal
+        view
+        returns (Attestation memory)
+    {
+        bytes32 easSchemaUid = _schemaBook.getSchemaUid(DojangSchemaIds.VERIFY_CODE_DOJANG);
+        address attesterAddress = _dojangAttesterBook.getAttester(attesterId);
+
+        bytes32 key = keccak256(abi.encode(codeHash, domain));
+        bytes32 attestationUid = _indexer.getAttestationUid(easSchemaUid, attesterAddress, address(0), key);
         return _EAS.getAttestation(attestationUid);
     }
 }

@@ -97,4 +97,43 @@ interface IDojangScroll {
         external
         view
         returns (bytes32);
+
+    /**
+     * @notice Checks whether the given codeHash and domain pair has a verified attestation from the specified attester
+     * @dev Returns true if a verified attestation exists for the (codeHash, domain, attester) combination.
+     *      The codeHash and domain MUST be derived off-chain according to the VerifyCodeSpec
+     *      (see `offchain-specs/verify-code/VerifyCodeSpec.sol`) so that issuers and verifiers
+     *      use a consistent hashing and canonicalization rule.
+     * @param codeHash The hashed verification code
+     * @param domain The domain string associated with the verification code; should be canonicalized before lookup
+     * @param attesterId The attester identifier
+     * @return Whether the verification code-domain pair is verified by the given attester
+     */
+    function isVerifiedCode(
+        bytes32 codeHash,
+        string calldata domain,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (bool);
+
+    /**
+     * @notice Returns the verified code attestation uid for the given codeHash-domain pair and attester
+     * @dev Reverts if no verified attestation exists for the given combination.
+     *      The caller MUST derive codeHash and canonicalized domain off-chain according to the VerifyCodeSpec
+     *      (see `offchain-specs/verify-code/VerifyCodeSpec.sol`) to ensure consistent lookup semantics.
+     * @param codeHash The hashed verification code
+     * @param domain The domain string associated with the verification code; should be canonicalized before lookup
+     * @param attesterId The attester identifier
+     * @return The verify-code attestation uid
+     */
+    function getVerifyCodeAttestationUid(
+        bytes32 codeHash,
+        string calldata domain,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (bytes32);
 }
