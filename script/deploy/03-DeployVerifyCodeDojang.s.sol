@@ -43,6 +43,7 @@ contract DeployVerifyCodeDojang is Script, Artifacts, DeployConfig {
 
     function run() public {
         deployVerifyCodeDojangResolver();
+        grantRoleAttestationIndexer();
         grantRoleVerifyCodeDojangResolver();
         configure();
     }
@@ -52,6 +53,12 @@ contract DeployVerifyCodeDojang is Script, Artifacts, DeployConfig {
             "VerifyCodeDojangResolver.sol", abi.encodeCall(VerifyCodeDojangResolver.initialize, admin)
         );
         save("VerifyCodeDojangResolver", proxy);
+    }
+
+    function grantRoleAttestationIndexer() public broadcast(adminKey) {
+        AttestationIndexer attestationIndexer = AttestationIndexer(mustGetAddress("AttestationIndexer"));
+        address verifyCodeDojangResolver = mustGetAddress("VerifyCodeDojangResolver");
+        attestationIndexer.grantRole(attestationIndexer.INDEXER_ROLE(), verifyCodeDojangResolver);
     }
 
     function grantRoleVerifyCodeDojangResolver() public broadcast(adminKey) {

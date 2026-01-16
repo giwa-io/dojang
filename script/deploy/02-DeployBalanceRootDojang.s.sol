@@ -48,13 +48,9 @@ contract DeployBalanceRootDojang is Script, Artifacts, DeployConfig {
     }
 
     function run() public {
-        /// deploy contracts
         deployBalanceRootDojangResolver();
-
-        /// grant role
+        grantRoleAttestationIndexer();
         grantRoleBalanceRootDojangResolver();
-
-        /// configure
         configure();
     }
 
@@ -63,6 +59,12 @@ contract DeployBalanceRootDojang is Script, Artifacts, DeployConfig {
             "BalanceRootDojangResolver.sol", abi.encodeCall(BalanceRootDojangResolver.initialize, admin)
         );
         save("BalanceRootDojangResolver", proxy);
+    }
+
+    function grantRoleAttestationIndexer() public broadcast(adminKey) {
+        AttestationIndexer attestationIndexer = AttestationIndexer(mustGetAddress("AttestationIndexer"));
+        address balanceRootDojangResolver = mustGetAddress("BalanceRootDojangResolver");
+        attestationIndexer.grantRole(attestationIndexer.INDEXER_ROLE(), balanceRootDojangResolver);
     }
 
     function grantRoleBalanceRootDojangResolver() public broadcast(adminKey) {
