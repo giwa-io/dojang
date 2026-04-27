@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ABI_TARGETS, PREDEPLOYS } from './constants.mjs';
+import { ABI_TARGETS, PREDEPLOYS, DEPLOYMENT_FILES } from './constants.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..', '..');
@@ -47,12 +47,7 @@ for (const { source, name } of ABI_TARGETS) {
 // --- Verify addresses correctness ---
 
 const addressesFileContent = readFileSync(join(SRC, 'addresses.ts'), 'utf-8');
-const deployments = JSON.parse(
-  readFileSync(join(ROOT, 'deployments', '91342-deploy.json'), 'utf-8')
-);
-const expectedAddresses = { ...deployments, ...PREDEPLOYS };
 
-// Extract the addresses object from generated file
 const addrMatch = addressesFileContent.match(
   /export const addresses = ([\s\S]*?) as const;/
 );
@@ -60,13 +55,24 @@ assert(addrMatch !== null, 'addresses exists in addresses.ts');
 
 if (addrMatch) {
   const generatedAddresses = JSON.parse(addrMatch[1]);
-  const generated91342 = generatedAddresses['91342'];
 
-  for (const [name, address] of Object.entries(expectedAddresses)) {
-    assert(
-      generated91342[name] === address,
-      `address ${name} = ${address}`
+  for (const { file, chainId } of DEPLOYMENT_FILES) {
+    const deployments = JSON.parse(
+      readFileSync(join(ROOT, 'deployments', file), 'utf-8')
     );
+    const expectedAddresses = { ...deployments, ...PREDEPLOYS };
+    const generatedChain = generatedAddresses[String(chainId)];
+
+    assert(generatedChain !== undefined, `chain ${chainId} exists in addresses.ts`);
+
+    if (generatedChain) {
+      for (const [name, address] of Object.entries(expectedAddresses)) {
+        assert(
+          generatedChain[name] === address,
+          `address ${name} = ${address} (chain ${chainId})`
+        );
+      }
+    }
   }
 }
 
