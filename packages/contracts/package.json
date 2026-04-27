@@ -26,7 +26,7 @@
     "verify": "node scripts/verify.mjs",
     "typecheck": "tsc --noEmit -p test/tsconfig.json",
     "test": "pnpm verify && pnpm typecheck",
-    "prepublishOnly": "pnpm build && pnpm test"
+    "prepublishOnly": "forge build --root ../.. && pnpm build && pnpm test"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
