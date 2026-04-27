@@ -1,24 +1,11 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ABI_TARGETS, PREDEPLOYS, DEPLOYMENT_FILES } from './constants.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..', '..');
 const SRC = join(__dirname, '..', 'src');
-
-// Contracts to extract ABIs from
-const ABI_TARGETS = [
-  { source: 'IDojangScroll.sol/IDojangScroll.json', name: 'dojangScrollAbi' },
-  { source: 'IAttestationIndexer.sol/IAttestationIndexer.json', name: 'attestationIndexerAbi' },
-  { source: 'SchemaBook.sol/SchemaBook.json', name: 'schemaBookAbi' },
-  { source: 'DojangAttesterBook.sol/DojangAttesterBook.json', name: 'dojangAttesterBookAbi' },
-];
-
-// Predeploy addresses (OP Stack standard)
-const PREDEPLOYS = {
-  SchemaRegistry: '0x4200000000000000000000000000000000000020',
-  EAS: '0x4200000000000000000000000000000000000021',
-};
 
 // --- Generate abi.ts ---
 
@@ -45,13 +32,9 @@ console.log('Generated src/abi.ts');
 // --- Generate addresses.ts ---
 
 const deploymentsDir = join(ROOT, 'deployments');
-const deploymentFiles = [
-  { file: '91342-deploy.json', chainId: 91342 },
-];
-
 const chains = {};
 
-for (const { file, chainId } of deploymentFiles) {
+for (const { file, chainId } of DEPLOYMENT_FILES) {
   const deployments = JSON.parse(readFileSync(join(deploymentsDir, file), 'utf-8'));
   chains[chainId] = {
     ...deployments,

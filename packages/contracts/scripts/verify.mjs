@@ -1,22 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ABI_TARGETS, PREDEPLOYS } from './constants.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..', '..');
 const SRC = join(__dirname, '..', 'src');
-
-const ABI_TARGETS = [
-  { source: 'IDojangScroll.sol/IDojangScroll.json', name: 'dojangScrollAbi' },
-  { source: 'IAttestationIndexer.sol/IAttestationIndexer.json', name: 'attestationIndexerAbi' },
-  { source: 'SchemaBook.sol/SchemaBook.json', name: 'schemaBookAbi' },
-  { source: 'DojangAttesterBook.sol/DojangAttesterBook.json', name: 'dojangAttesterBookAbi' },
-];
-
-const PREDEPLOYS = {
-  SchemaRegistry: '0x4200000000000000000000000000000000000020',
-  EAS: '0x4200000000000000000000000000000000000021',
-};
 
 let failures = 0;
 
@@ -81,12 +70,13 @@ if (addrMatch) {
   }
 }
 
-// --- Verify as const is present ---
+// --- Verify as const is present per ABI ---
 
 for (const { name } of ABI_TARGETS) {
+  const pattern = new RegExp(`export const ${name} = [\\s\\S]*?\\] as const;`);
   assert(
-    abiFileContent.includes(`] as const;`),
-    `abi.ts contains "as const" assertion`
+    pattern.test(abiFileContent),
+    `${name} has "as const" assertion`
   );
 }
 
