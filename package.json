@@ -14,7 +14,9 @@
     "test:coverage-report": "forge coverage --no-match-coverage 'script|SchemaResolverUpgradeable' --report lcov && genhtml --ignore-errors inconsistent -o coverage-report --branch-coverage lcov.info && open ./coverage-report/index.html",
     "lint": "forge fmt --check && pnpm solhint \"src/**/*.sol\" --max-warnings=0",
     "lint:fix": "forge fmt && pnpm solhint \"src/**/*.sol\" --fix",
-    "slither": "slither ."
+    "slither": "slither .",
+    "contracts:generate": "pnpm --filter @giwa/dojang-contracts generate",
+    "contracts:build": "pnpm --filter @giwa/dojang-contracts build"
   },
   "devDependencies": {
     "solhint": "^5.0.5"

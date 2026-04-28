@@ -57,3 +57,20 @@ jobs:
           pnpm build
           pnpm test:coverage
         working-directory: .
+
+  contracts-package:
+    needs: [variables]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup
+        uses: ./.github/actions
+      - name: Build and Verify
+        run: |
+          pnpm install
+          pnpm dep
+          pnpm build
+          pnpm contracts:build
+          pnpm --filter @giwa/dojang-contracts test
+        working-directory: .

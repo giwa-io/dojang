@@ -1,0 +1,35 @@
+{
+  "name": "@giwa/dojang-contracts",
+  "version": "0.5.0",
+  "description": "TypeScript ABI and addresses for Dojang contracts",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "build": "pnpm generate && tsup",
+    "verify": "node scripts/verify.mjs",
+    "typecheck": "tsc --noEmit -p test/tsconfig.json",
+    "test": "pnpm verify && pnpm typecheck",
+    "prepublishOnly": "forge build --root ../.. && pnpm build && pnpm test"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0"
+  }
+}

@@ -11,3 +11,8 @@ node_modules/
 coverage-report/
 
 .env
+
+# packages/contracts (generated)
+packages/contracts/dist/
+packages/contracts/src/abi.ts
+packages/contracts/src/addresses.ts
