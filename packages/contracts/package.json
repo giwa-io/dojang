@@ -1,5 +1,5 @@
 {
-  "name": "@giwa/dojang-contracts",
+  "name": "@giwa-io/dojang-contracts",
   "version": "0.5.0",
   "description": "TypeScript ABI and addresses for Dojang contracts",
   "license": "MIT",
