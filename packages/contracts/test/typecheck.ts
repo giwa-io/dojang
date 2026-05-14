@@ -1,5 +1,5 @@
 /**
- * Type-level verification for @giwa/dojang-contracts
+ * Type-level verification for @giwa-io/dojang-contracts
  *
  * This file does NOT run — it only compiles.
  * `tsc --noEmit` on this file verifies that ABI and address exports

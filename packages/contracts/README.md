@@ -1,4 +1,4 @@
-# @giwa/dojang-contracts
+# @giwa-io/dojang-contracts
 
 TypeScript ABI and addresses for Dojang contracts on the GIWA chain.
 
@@ -7,16 +7,16 @@ ABIs are exported as `as const` literals, enabling full type inference with [vie
 ## Install
 
 ```bash
-npm install @giwa/dojang-contracts
+npm install @giwa-io/dojang-contracts
 # or
-pnpm add @giwa/dojang-contracts
+pnpm add @giwa-io/dojang-contracts
 ```
 
 ## Usage
 
 ```typescript
 import { createPublicClient, http } from 'viem';
-import { dojangScrollAbi, addresses } from '@giwa/dojang-contracts';
+import { dojangScrollAbi, addresses } from '@giwa-io/dojang-contracts';
 
 const client = createPublicClient({ chain: giwaSepolia, transport: http() });
 
@@ -42,7 +42,7 @@ const verified = await client.readContract({
 Chain-specific contract addresses are exported via `addresses`:
 
 ```typescript
-import { addresses } from '@giwa/dojang-contracts';
+import { addresses } from '@giwa-io/dojang-contracts';
 
 addresses[91342].DojangScroll     // '0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9'
 addresses[91342].EAS              // '0x4200000000000000000000000000000000000021'

@@ -72,5 +72,5 @@ jobs:
           pnpm dep
           pnpm build
           pnpm contracts:build
-          pnpm --filter @giwa/dojang-contracts test
+          pnpm --filter @giwa-io/dojang-contracts test
         working-directory: .

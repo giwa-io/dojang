@@ -15,8 +15,8 @@
     "lint": "forge fmt --check && pnpm solhint \"src/**/*.sol\" --max-warnings=0",
     "lint:fix": "forge fmt && pnpm solhint \"src/**/*.sol\" --fix",
     "slither": "slither .",
-    "contracts:generate": "pnpm --filter @giwa/dojang-contracts generate",
-    "contracts:build": "pnpm --filter @giwa/dojang-contracts build"
+    "contracts:generate": "pnpm --filter @giwa-io/dojang-contracts generate",
+    "contracts:build": "pnpm --filter @giwa-io/dojang-contracts build"
   },
   "devDependencies": {
     "solhint": "^5.0.5"
