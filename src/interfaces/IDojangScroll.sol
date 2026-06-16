@@ -25,6 +25,9 @@ interface IDojangScroll {
      */
     error NotVerifiedBalance(address recipient, uint256 coinType, uint64 snapshotAt);
 
+    /// @notice Thrown when the root attestation's attester does not match the expected attester.
+    error MismatchRootAttester(address actual, address expected);
+
     /**
      * @notice Checks whether the given address has a verified attestation from the specified attester
      * @dev Returns true if a verified attestation exists for the address-attester pair

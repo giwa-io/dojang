@@ -80,7 +80,7 @@ contract DojangScroll_Upgrade is DojangScroll_Base {
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
-        assertEq(dojangScroll.version(), "0.5.0");
+        assertEq(dojangScroll.version(), "0.5.1");
 
         address newImpl = address(new DojangScrollV2());
 
@@ -332,6 +332,20 @@ contract DojangScroll_Test is DojangScroll_Base {
         );
     }
 
+    // getVerifiedBalance only: mock the root attestation looked up directly by refUID
+    function mockRootAttestationByRefUID(Attestation memory rootAttestation) internal {
+        vm.mockCall(
+            SCHEMA_BOOK,
+            abi.encodeWithSelector(SchemaBook.getSchemaUid.selector, DojangSchemaIds.BALANCE_ROOT_DOJANG),
+            abi.encode(BALANCE_ROOT_DOJANG_SCHEMA_UID)
+        );
+        vm.mockCall(
+            Predeploys.EAS,
+            abi.encodeWithSelector(IEAS.getAttestation.selector, rootAttestation.uid),
+            abi.encode(rootAttestation)
+        );
+    }
+
     function mockGetBalanceAttestation(Attestation memory attestation) internal {
         vm.mockCall(
             SCHEMA_BOOK,
@@ -541,7 +555,7 @@ contract DojangScroll_Test is DojangScroll_Base {
         balanceRootAttestation.data =
             abi.encode(SOLANA_COIN_TYPE, otherSnapshotTime, uint192(1), uint256(1), bytes32(0));
         mockGetBalanceAttestation(balanceAttestation);
-        mockGetBalanceRootAttestation(balanceRootAttestation);
+        mockRootAttestationByRefUID(balanceRootAttestation);
 
         vm.expectRevert(
             abi.encodeWithSelector(IDojangScroll.NotVerifiedBalance.selector, ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT)
@@ -549,9 +563,42 @@ contract DojangScroll_Test is DojangScroll_Base {
         dojangScroll.getVerifiedBalance(ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
     }
 
+    function test_getVerifiedBalance_revert_when_refUidZero() public {
+        balanceAttestation.refUID = bytes32(0);
+        mockGetBalanceAttestation(balanceAttestation);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(IDojangScroll.NotVerifiedBalance.selector, ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT)
+        );
+        dojangScroll.getVerifiedBalance(ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getVerifiedBalance_revert_when_rootSchemaMismatch() public {
+        balanceRootAttestation.schema = BALANCE_DOJANG_SCHEMA_UID;
+        mockGetBalanceAttestation(balanceAttestation);
+        mockRootAttestationByRefUID(balanceRootAttestation);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AttestationVerifier.MisMatchSchema.selector, BALANCE_DOJANG_SCHEMA_UID, BALANCE_ROOT_DOJANG_SCHEMA_UID
+            )
+        );
+        dojangScroll.getVerifiedBalance(ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getVerifiedBalance_revert_when_rootAttesterMismatch() public {
+        address malicious = makeAddr("malicious");
+        balanceRootAttestation.attester = malicious;
+        mockGetBalanceAttestation(balanceAttestation);
+        mockRootAttestationByRefUID(balanceRootAttestation);
+
+        vm.expectRevert(abi.encodeWithSelector(IDojangScroll.MismatchRootAttester.selector, malicious, attester));
+        dojangScroll.getVerifiedBalance(ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+    }
+
     function test_getVerifiedBalance_succeeds() public {
         mockGetBalanceAttestation(balanceAttestation);
-        mockGetBalanceRootAttestation(balanceRootAttestation);
+        mockRootAttestationByRefUID(balanceRootAttestation);
 
         uint256 balance =
             dojangScroll.getVerifiedBalance(ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
