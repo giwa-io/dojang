@@ -147,17 +147,24 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     {
         Attestation memory attestation = _getBalanceAttestation(recipient, coinType, snapshotAt, attesterId);
         attestation.verify();
-        Attestation memory rootAttestation = _getBalanceRootAttestation(coinType, snapshotAt, attesterId);
-        rootAttestation.verify();
+
+        if (attestation.refUID == bytes32(0)) revert NotVerifiedBalance(recipient, coinType, snapshotAt);
+
+        Attestation memory rootAttestation = _EAS.getAttestation(attestation.refUID);
+        bytes32 rootSchemaUid = _schemaBook.getSchemaUid(DojangSchemaIds.BALANCE_ROOT_DOJANG);
+        // Root attestations always use address(0) as recipient
+        rootAttestation.verify(address(0), rootSchemaUid);
+
+        address attesterAddress = _dojangAttesterBook.getAttester(attesterId);
+        if (rootAttestation.attester != attesterAddress) {
+            revert MismatchRootAttester(rootAttestation.attester, attesterAddress);
+        }
 
         (uint256 decodedCoinType, uint64 decodedSnapshotAt,,,) =
             abi.decode(rootAttestation.data, (uint256, uint64, uint192, uint256, bytes32));
         (uint256 decodedBalance,,) = abi.decode(attestation.data, (uint256, bytes32, bytes32[]));
 
-        if (
-            rootAttestation.uid != attestation.refUID || decodedCoinType != coinType || decodedSnapshotAt != snapshotAt
-                || attestation.recipient != recipient
-        ) {
+        if (decodedCoinType != coinType || decodedSnapshotAt != snapshotAt || attestation.recipient != recipient) {
             revert NotVerifiedBalance(recipient, coinType, snapshotAt);
         }
 
@@ -230,9 +237,9 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     }
 
     /// @notice Semantic version.
-    /// @custom:semver 0.5.0
+    /// @custom:semver 0.5.1
     function version() public pure virtual returns (string memory) {
-        return "0.5.0";
+        return "0.5.1";
     }
 
     /**
