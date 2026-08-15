@@ -726,4 +726,41 @@ contract DojangScroll_Test is DojangScroll_Base {
             dojangScroll.getVerifyCodeAttestationUid(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA);
         assertEq(attestationUid, VERIFY_CODE_ATTESTATION_UID);
     }
+
+    function test_getAddressAttestation_succeeds() public {
+        mockGetAddressAttestation(addressAttestation);
+
+        Attestation memory att = dojangScroll.getAddressAttestation(ADDRESS, DojangAttesterIds.UPBIT_KOREA);
+        assertEq(att.uid, ADDRESS_ATTESTATION_UID);
+        assertEq(att.recipient, ADDRESS);
+        assertEq(att.expirationTime, addressAttestation.expirationTime);
+    }
+
+    function test_getBalanceRootAttestation_succeeds() public {
+        mockGetBalanceRootAttestation(balanceRootAttestation);
+
+        Attestation memory att =
+            dojangScroll.getBalanceRootAttestation(SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+        assertEq(att.uid, BALANCE_ROOT_ATTESTATION_UID);
+        assertEq(att.recipient, address(0));
+        assertEq(att.expirationTime, balanceRootAttestation.expirationTime);
+    }
+
+    function test_getBalanceAttestation_succeeds() public {
+        mockGetBalanceAttestation(balanceAttestation);
+
+        Attestation memory att =
+            dojangScroll.getBalanceAttestation(ADDRESS, SOLANA_COIN_TYPE, SNAPSHOT_AT, DojangAttesterIds.UPBIT_KOREA);
+        assertEq(att.uid, BALANCE_ATTESTATION_UID);
+        assertEq(att.recipient, ADDRESS);
+        assertEq(att.expirationTime, balanceAttestation.expirationTime);
+    }
+
+    function test_getVerifyCodeAttestation_succeeds() public {
+        mockGetVerifyCodeAttestation(verifyCodeAttestation);
+
+        Attestation memory att = dojangScroll.getVerifyCodeAttestation(CODE_HASH, DOMAIN, DojangAttesterIds.UPBIT_KOREA);
+        assertEq(att.uid, VERIFY_CODE_ATTESTATION_UID);
+        assertEq(att.expirationTime, verifyCodeAttestation.expirationTime);
+    }
 }
