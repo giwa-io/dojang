@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {DojangAttesterId} from "../libraries/Types.sol";
+import {Attestation} from "@eas-contracts/contracts/IEAS.sol";
 
 interface IDojangScroll {
     /**
@@ -139,4 +140,68 @@ interface IDojangScroll {
         external
         view
         returns (bytes32);
+
+    /**
+     * @notice Returns the address attestation record for the given user address and attester
+     * @dev Returns the raw attestation without evaluating timestamps or reverting on expiration,
+     *      enabling ERC-4337 validation (where TIMESTAMP opcode is banned under ERC-7562)
+     *      to extract expirationTime as validUntil.
+     * @param addr The address of the user
+     * @param attesterId The attester identifier
+     * @return The address attestation record
+     */
+    function getAddressAttestation(address addr, DojangAttesterId attesterId) external view returns (Attestation memory);
+
+    /**
+     * @notice Returns the balance root attestation record for the given coin type and timestamp
+     * @dev Returns the raw attestation without evaluating timestamps or reverting on expiration.
+     * @param coinType The custom coin type of the asset
+     * @param snapshotAt The timestamp representing when the balance snapshot was taken
+     * @param attesterId The attester identifier
+     * @return The balance root attestation record
+     */
+    function getBalanceRootAttestation(
+        uint256 coinType,
+        uint64 snapshotAt,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (Attestation memory);
+
+    /**
+     * @notice Returns the balance attestation record for the given recipient, coin type and timestamp
+     * @dev Returns the raw attestation without evaluating timestamps or reverting on expiration.
+     * @param recipient The address of the user
+     * @param coinType The custom coin type of the asset
+     * @param snapshotAt The timestamp representing when the balance snapshot was taken
+     * @param attesterId The attester identifier
+     * @return The balance attestation record
+     */
+    function getBalanceAttestation(
+        address recipient,
+        uint256 coinType,
+        uint64 snapshotAt,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (Attestation memory);
+
+    /**
+     * @notice Returns the verify-code attestation record for the given codeHash and domain
+     * @dev Returns the raw attestation without evaluating timestamps or reverting on expiration.
+     * @param codeHash The hashed verification code
+     * @param domain The domain string associated with the verification code; should be canonicalized before lookup
+     * @param attesterId The attester identifier
+     * @return The verify-code attestation record
+     */
+    function getVerifyCodeAttestation(
+        bytes32 codeHash,
+        string calldata domain,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (Attestation memory);
 }
