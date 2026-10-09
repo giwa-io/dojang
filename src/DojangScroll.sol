@@ -222,6 +222,66 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     }
 
     /**
+     * @inheritdoc IDojangScroll
+     */
+    function getAddressAttestation(
+        address addr,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (Attestation memory)
+    {
+        return _getAddressAttestation(addr, attesterId);
+    }
+
+    /**
+     * @inheritdoc IDojangScroll
+     */
+    function getBalanceRootAttestation(
+        uint256 coinType,
+        uint64 snapshotAt,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (Attestation memory)
+    {
+        return _getBalanceRootAttestation(coinType, snapshotAt, attesterId);
+    }
+
+    /**
+     * @inheritdoc IDojangScroll
+     */
+    function getBalanceAttestation(
+        address recipient,
+        uint256 coinType,
+        uint64 snapshotAt,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (Attestation memory)
+    {
+        return _getBalanceAttestation(recipient, coinType, snapshotAt, attesterId);
+    }
+
+    /**
+     * @inheritdoc IDojangScroll
+     */
+    function getVerifyCodeAttestation(
+        bytes32 codeHash,
+        string calldata domain,
+        DojangAttesterId attesterId
+    )
+        external
+        view
+        returns (Attestation memory)
+    {
+        return _getVerifyCodeAttestation(codeHash, domain, attesterId);
+    }
+
+    /**
      * @dev Initializes the contract
      * @param admin The address to be granted with the default admin Role
      */
