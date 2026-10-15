@@ -80,7 +80,7 @@ contract DojangScroll_Upgrade is DojangScroll_Base {
     }
 
     function test_upgrade_succeeds_by_upgrader() public {
-        assertEq(dojangScroll.version(), "0.5.1");
+        assertEq(dojangScroll.version(), "0.5.2");
 
         address newImpl = address(new DojangScrollV2());
 
@@ -425,6 +425,20 @@ contract DojangScroll_Test is DojangScroll_Base {
         vm.assertFalse(dojangScroll.isVerified(ADDRESS, DojangAttesterIds.UPBIT_KOREA));
     }
 
+    function test_isVerified_false_when_payloadIsFalse() public {
+        addressAttestation.data = abi.encode(false);
+        mockGetAddressAttestation(addressAttestation);
+
+        vm.assertFalse(dojangScroll.isVerified(ADDRESS, DojangAttesterIds.UPBIT_KOREA));
+    }
+
+    function test_isVerified_false_when_payloadIsMalformed() public {
+        addressAttestation.data = "";
+        mockGetAddressAttestation(addressAttestation);
+
+        vm.assertFalse(dojangScroll.isVerified(ADDRESS, DojangAttesterIds.UPBIT_KOREA));
+    }
+
     function test_isVerified_true() public {
         mockGetAddressAttestation(addressAttestation);
 
@@ -464,6 +478,14 @@ contract DojangScroll_Test is DojangScroll_Base {
                 uint64(block.timestamp) - 5 minutes
             )
         );
+        dojangScroll.getVerifiedAddressAttestationUid(ADDRESS, DojangAttesterIds.UPBIT_KOREA);
+    }
+
+    function test_getVerifiedAddressAttestationUid_revert_when_payloadIsFalse() public {
+        addressAttestation.data = abi.encode(false);
+        mockGetAddressAttestation(addressAttestation);
+
+        vm.expectRevert(abi.encodeWithSelector(IDojangScroll.NotVerifiedAddress.selector, ADDRESS));
         dojangScroll.getVerifiedAddressAttestationUid(ADDRESS, DojangAttesterIds.UPBIT_KOREA);
     }
 
