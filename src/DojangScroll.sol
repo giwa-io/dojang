@@ -96,7 +96,8 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
      * @inheritdoc IDojangScroll
      */
     function isVerified(address addr, DojangAttesterId attesterId) external view returns (bool) {
-        return _getAddressAttestation(addr, attesterId).isVerified();
+        Attestation memory attestation = _getAddressAttestation(addr, attesterId);
+        return attestation.isVerified() && _isVerifiedPayload(attestation.data);
     }
 
     /**
@@ -112,6 +113,7 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     {
         Attestation memory attestation = _getAddressAttestation(addr, attesterId);
         attestation.verify();
+        if (!_isVerifiedPayload(attestation.data)) revert NotVerifiedAddress(addr);
         return attestation.uid;
     }
 
@@ -237,9 +239,9 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
     }
 
     /// @notice Semantic version.
-    /// @custom:semver 0.5.1
+    /// @custom:semver 0.5.2
     function version() public pure virtual returns (string memory) {
-        return "0.5.1";
+        return "0.5.2";
     }
 
     /**
@@ -347,5 +349,16 @@ contract DojangScroll is UUPSUpgradeable, AccessControlUpgradeable, IDojangScrol
         bytes32 key = keccak256(abi.encode(codeHash, domain));
         bytes32 attestationUid = _indexer.getAttestationUid(easSchemaUid, attesterAddress, address(0), key);
         return _EAS.getAttestation(attestationUid);
+    }
+
+    /**
+     * @notice Checks the `bool isVerified` payload of a Verified Address attestation.
+     * @dev Returns false for malformed data instead of reverting, so that `isVerified`
+     * never reverts on attestations it cannot decode.
+     * @param data The attestation data, ABI-encoded as `(bool isVerified)`
+     * @return Whether the payload is exactly an ABI-encoded `true`
+     */
+    function _isVerifiedPayload(bytes memory data) internal pure returns (bool) {
+        return data.length == 32 && uint256(bytes32(data)) == 1;
     }
 }
